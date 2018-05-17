@@ -1,0 +1,1 @@
+* Follow [these steps](https://developers.google.com/calendar/quickstart/python) to turn on Google Calendar API
