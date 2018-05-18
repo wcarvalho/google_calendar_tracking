@@ -13,8 +13,9 @@ import argparse
 from lib import get_calendars_info, setup_calendar
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-s", "--start", default=None)
-parser.add_argument("-e", "--end", default=None)
+parser.add_argument("-f", "--file", default=None, help="if set, will save to this file. currently only support yaml.")
+parser.add_argument("-s", "--start", default=None, help="start time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use current time.")
+parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use end of current day.")
 parser.add_argument("-t", "--timezone", default="US/Pacific")
 args = parser.parse_args()
 
@@ -22,8 +23,14 @@ tz = timezone(args.timezone)
 
 format = "%m/%d/%Y %H:%M"
 
-if not args.start: start = datetime.now(tz=tz).isoformat()
-end = datetime.strptime(args.end, format).replace(tzinfo=tz).isoformat()
+if args.start: 
+    start = datetime.strptime(args.start, format).replace(tzinfo=tz).isoformat()
+else: 
+    start = datetime.now(tz=tz).isoformat()
+if args.end: 
+    end = datetime.strptime(args.end, format).replace(tzinfo=tz).isoformat()
+else:
+    raise RuntimeError("Not yet implemented when don't set `--end`")
 
 service = setup_calendar()
 calendars = get_calendars_info(service)
@@ -35,10 +42,10 @@ for cal in calendars:
     print(cal)
     id=calendars[cal]['id']
     events_result = service.events().list(
-        calendarId=id, 
+        calendarId=id,
         timeMin=start, 
         timeMax=end,
-        maxResults=3, singleEvents=True,
+        maxResults=1000, singleEvents=True,
         orderBy='startTime').execute()
     events = events_result.get('items', [])
 
