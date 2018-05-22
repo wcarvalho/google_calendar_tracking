@@ -1,7 +1,7 @@
 ## Goal
 I've wanted to template my calendars for years. I think each week is different, but I think weeks repeat. I like to schedule most of my time (even if I don't follow the schedule so strictly) so that I have a foundation to work from. These scripts are my attempt at doing so. The idea right now is to implement 4 functions
 * read: this will read calendar events between in a time-frame (and optionally save them) 
-* remove: this will remove calendar events in a time-frame
+* clear: this will clear calendar events in a time-frame
 * put: this will put events into the calendar from a file
 * move: this will move events within a time-frame "up" or "down"
 
@@ -18,11 +18,11 @@ Together, I should be able to create, save, load, and move events with these scr
    * ~~read in all the calendar events between a set start and end time~~
    * ~~option to save to yaml file~~
 
-2. **Function: remove.py**. 
-   * Clear all the calendar events between a set start and end time
+2. **Function: clear.py**. 
+   * ~~Clear all the calendar events between a set start and end time~~
 
 3. **Function: put.py**. 
-   * Using a yaml file, set events for a given day
+   * ~~Using a yaml file, set events for a given day~~
       * set events for multiple days (e.g. 2 days of worth of events)
       * repeat both 1 and 2 days worth of events every 7 days for 100 days
 

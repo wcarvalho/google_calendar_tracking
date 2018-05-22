@@ -31,23 +31,23 @@ from oauth2client import file, client, tools
 # date utilities
 from pytz import timezone
 from dateutil.parser import parse
-from dateutil.relativedelta import relativedelta
+from dateutil import tz
 from datetime import datetime, timedelta
 
 # this library
-from lib import get_calendars_info, setup_calendar
+from lib import get_calendars_info, setup_calendar, load_start_end
 from read import load_events, display_events, read_google_event_time
 
 def delete_events(service, calendars, all_events, absolute_start, timezone, verbose=False):
   for cal in calendars:
     events = all_events[cal]
-    if verbose:
+    if verbose and events:
       print()
       print(cal)
     for event in events:
         start, _ = read_google_event_time(event)
         start = start.astimezone(timezone)
-        if start < parse(absolute_start): continue
+        if start < absolute_start: continue
         if verbose:
           print("Deleting %d/%d/%d %.2d:%.2d %s" %(start.month, start.day, start.year, start.hour, start.minute, event['summary']))
         service.events().delete(calendarId=calendars[cal]['id'], eventId=event['id']).execute()
@@ -60,25 +60,15 @@ def main():
   parser.add_argument("-v", "--verbose", action='store_true')
   args = parser.parse_args()
 
-  tz = timezone(args.timezone)
-
-  format = "%m/%d/%Y %H:%M"
-
-  if args.start: 
-      start = datetime.strptime(args.start, format).replace(tzinfo=tz).isoformat()
-  else: 
-      start = datetime.now(tz=tz).isoformat()
-  if args.end: 
-      end = datetime.strptime(args.end, format).replace(tzinfo=tz).isoformat()
-  else:
-      # end = parse(start) + relativedelta(days=+1)
-      # end = str(end.replace(hour=0,minute=0,tzinfo=tz))
-      raise RuntimeError("Not yet implemented when don't set `--end`")
+  tzinfo = tz.gettz(args.timezone)
+  if not args.start:
+      raise RuntimeError("Please select a day to clear")
+  start, end = load_start_end(args.start, args.end, tzinfo)
 
   service = setup_calendar()
   calendars = get_calendars_info(service)
   all_events = load_events(service, calendars, start, end)
-  delete_events(service, calendars, all_events, start, tz, args.verbose)
+  delete_events(service, calendars, all_events, start, tzinfo, args.verbose)
 
 if __name__ == "__main__":
     main()

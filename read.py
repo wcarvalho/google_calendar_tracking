@@ -31,11 +31,11 @@ from oauth2client import file, client, tools
 # date utilities
 from pytz import timezone
 from dateutil.parser import parse
-from dateutil.relativedelta import relativedelta
+from dateutil import tz
 from datetime import datetime, timedelta
 
 # this library
-from lib import get_calendars_info, setup_calendar
+from lib import get_calendars_info, setup_calendar, load_start_end
 
 def read_google_event_time(event):
     # ev_start = event['start'].get('dateTime', event['start'].get('date'))
@@ -49,14 +49,14 @@ def load_events(service, calendars, start, end, maxResults=1000):
         id = calendars[cal]['id']
         events_result = service.events().list(
             calendarId=id,
-            timeMin=start, 
-            timeMax=end,
+            timeMin=start.isoformat(), 
+            timeMax=end.isoformat(),
             maxResults=maxResults, singleEvents=True,
             orderBy='startTime').execute()
         events[cal] = events_result.get('items', [])
     return events
 
-def display_events(all_events, absolute_start, end, tz, raw=False):
+def display_events(calendars, all_events, absolute_start, end, tz, raw=False):
     print("Printing all events between:")
     print("    %s" % absolute_start)
     print("    %s" % end)
@@ -71,7 +71,7 @@ def display_events(all_events, absolute_start, end, tz, raw=False):
             start, end = read_google_event_time(event)
             start = start.astimezone(tz)
             end = end.astimezone(tz)
-            if start < parse(absolute_start): continue
+            if start < absolute_start: continue
 
             if raw:
                 # print(date.tzinfo)
@@ -79,7 +79,7 @@ def display_events(all_events, absolute_start, end, tz, raw=False):
             else:
                 print("%d/%d/%d %.2d:%.2d" %(start.month, start.day, start.year, start.hour, start.minute), event['summary'])
 
-def create_events_object(all_events, absolute_start, tz):
+def create_events_object(calendars, all_events, absolute_start, tz):
 
     data = {"days":[]}
     pointers = {}
@@ -91,7 +91,7 @@ def create_events_object(all_events, absolute_start, tz):
             start, end = read_google_event_time(event)
             start = start.astimezone(tz)
             end = end.astimezone(tz)
-            if start < parse(absolute_start): continue
+            if start < absolute_start: continue
 
             # keep pointers to elements which are accessed by the start
             key = "%d/%d/%d" % (start.month, start.day, start.year)
@@ -157,28 +157,23 @@ def main():
     parser.add_argument("-r", "--raw", action='store_true', help="show raw timestamps")
     args = parser.parse_args()
 
-    tz = timezone(args.timezone)
-
-    format = "%m/%d/%Y %H:%M"
-
-    if args.start: 
-        start = datetime.strptime(args.start, format).replace(tzinfo=tz).isoformat()
-    else: 
-        start = datetime.now(tz=tz).isoformat()
-    if args.end: 
-        end = datetime.strptime(args.end, format).replace(tzinfo=tz).isoformat()
-    else:
-        # end = parse(start) + relativedelta(days=+1)
-        # end = str(end.replace(hour=0,minute=0,tzinfo=tz))
-        raise RuntimeError("Not yet implemented when don't set `--end`")
 
     service = setup_calendar()
     calendars = get_calendars_info(service)
+
+    tzinfo = tz.gettz(args.timezone)
+    start, end = load_start_end(args.start, args.end, tzinfo)
     all_events = load_events(service, calendars, start, end)
 
-    if args.verbose: display_events(all_events, start, end, tz, args.raw)
+    # event = all_events['misc'][0]
+    # start_time = event['start']['dateTime']
+    # print(start)
+    # print(start_time)
+    # import ipdb; ipdb.set_trace()
+
+    if args.verbose: display_events(calendars, all_events, start, end, tzinfo, args.raw)
     if args.file:
-        data = create_events_object(all_events, start, tz)
+        data = create_events_object(calendars, all_events, start, tzinfo)
         file = open(args.file, 'w')
         yaml.dump(data, file)
 

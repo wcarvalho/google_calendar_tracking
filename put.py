@@ -9,9 +9,10 @@ import pprint
 import argparse
 
 # date utilities
-from pytz import timezone
+# from pytz import timezone
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from dateutil import tz
 from datetime import datetime, timedelta
 
 # this library
@@ -25,7 +26,7 @@ def main():
   parser.add_argument("-s", "--start", default=None, help="start time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use current date.")
   # parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use end of current day.")
   parser.add_argument("-t", "--timezone", default="US/Pacific")
-  # parser.add_argument("-v", "--verbose", action='store_true')
+  parser.add_argument("-v", "--verbose", action='store_true')
   args = parser.parse_args()
 
   file=args.file
@@ -35,12 +36,12 @@ def main():
   data={}
   data.update(yaml.load(f))
 
-  tz = timezone(args.timezone)
-  format = "%m/%d/%Y"
+  tzfile = tz.gettz(args.timezone)
+
   if args.start: 
-      start = datetime.strptime(args.start, format).replace(tzinfo=tz).replace(hour=0,minute=0)
+      start = parse(args.start).replace(hour=0,minute=0,tzinfo=tzfile)
   else: 
-      start = datetime.now(tz=tz).replace(hour=0,minute=0)
+      start = datetime.now(tz=tz).replace(hour=0,minute=0,tzinfo=tzfile)
 
   service = setup_calendar()
   calendars = get_calendars_info(service)
@@ -48,6 +49,8 @@ def main():
   cur_time = start.replace()
   starting_day = data['days'][0]['day']
   for day in data['days']:
+    if args.verbose:
+      print("Day %d" % day)
     for event in day['events']:
 
       # get start hour + minute
@@ -65,10 +68,10 @@ def main():
           'timeZone': args.timezone,
         }
       }
-
-      # pprint.pprint(event_json)
-      # calendarId = calendars[event['calendar']]['id']
-      # event = service.events().insert(calendarId=calendarId, body=event_json).execute()
+      calendarId = calendars[event['calendar']]['id']
+      event = service.events().insert(calendarId=calendarId, body=event_json).execute()
+      if args.verbose:
+        print("%s %s: %s" % (str(event_time.date()), str(event_time.time()), event['summary']))
     break
 
   # pprint.pprint(data)

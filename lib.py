@@ -2,7 +2,24 @@ from apiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 
+from dateutil.parser import parse
+from datetime import timedelta
 import yaml
+
+def load_start_end(start, end, tzinfo):
+  # tzinfo info:
+      # replace: keeps current time and uses timezone
+      # astimezone: converts time to that timezone
+  if start: 
+    start = parse(start).replace(tzinfo=tzinfo)
+  else: 
+    start = datetime.now(tz=tzinfo)
+  if end: 
+    end = parse(end).replace(tzinfo=tzinfo)
+  else:
+    end= start + timedelta(days=1)
+    end = parse(str(end.date())).replace(tzinfo=tzinfo)
+  return start, end
 
 def get_calendars_info(service, f="calendars.yaml", op='planning', desired_attributes = ['id']):
   stream = open(f, 'r')
