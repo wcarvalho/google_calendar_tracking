@@ -147,38 +147,40 @@ def create_events_object(all_events, absolute_start, tz):
 
     return data
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", default=None, help="if set, will save to this file. currently only support yaml.")
+    parser.add_argument("-s", "--start", default=None, help="start time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use current time.")
+    parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use end of current day.")
+    parser.add_argument("-t", "--timezone", default="US/Pacific")
+    parser.add_argument("-v", "--verbose", action='store_true')
+    parser.add_argument("-r", "--raw", action='store_true', help="show raw timestamps")
+    args = parser.parse_args()
 
+    tz = timezone(args.timezone)
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-f", "--file", default=None, help="if set, will save to this file. currently only support yaml.")
-parser.add_argument("-s", "--start", default=None, help="start time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use current time.")
-parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use end of current day.")
-parser.add_argument("-t", "--timezone", default="US/Pacific")
-parser.add_argument("-v", "--verbose", action='store_true')
-parser.add_argument("-r", "--raw", action='store_true', help="show raw timestamps")
-args = parser.parse_args()
+    format = "%m/%d/%Y %H:%M"
 
-tz = timezone(args.timezone)
+    if args.start: 
+        start = datetime.strptime(args.start, format).replace(tzinfo=tz).isoformat()
+    else: 
+        start = datetime.now(tz=tz).isoformat()
+    if args.end: 
+        end = datetime.strptime(args.end, format).replace(tzinfo=tz).isoformat()
+    else:
+        # end = parse(start) + relativedelta(days=+1)
+        # end = str(end.replace(hour=0,minute=0,tzinfo=tz))
+        raise RuntimeError("Not yet implemented when don't set `--end`")
 
-format = "%m/%d/%Y %H:%M"
+    service = setup_calendar()
+    calendars = get_calendars_info(service)
+    all_events = load_events(service, calendars, start, end)
 
-if args.start: 
-    start = datetime.strptime(args.start, format).replace(tzinfo=tz).isoformat()
-else: 
-    start = datetime.now(tz=tz).isoformat()
-if args.end: 
-    end = datetime.strptime(args.end, format).replace(tzinfo=tz).isoformat()
-else:
-    # end = parse(start) + relativedelta(days=+1)
-    # end = str(end.replace(hour=0,minute=0,tzinfo=tz))
-    raise RuntimeError("Not yet implemented when don't set `--end`")
+    if args.verbose: display_events(all_events, start, end, tz, args.raw)
+    if args.file:
+        data = create_events_object(all_events, start, tz)
+        file = open(args.file, 'w')
+        yaml.dump(data, file)
 
-service = setup_calendar()
-calendars = get_calendars_info(service)
-all_events = load_events(service, calendars, start, end)
-
-if args.verbose: display_events(all_events, start, end, tz, args.raw)
-if args.file:
-    data = create_events_object(all_events, start, tz)
-    file = open(args.file, 'w')
-    yaml.dump(data, file)
+if __name__ == "__main__":
+    main()
