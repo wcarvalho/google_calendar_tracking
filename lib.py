@@ -29,3 +29,4 @@ def setup_calendar(credentials="credentials.json", secret="client_secret.json"):
       flow = client.flow_from_clientsecrets(secret, SCOPES)
       creds = tools.run_flow(flow, store)
   return build('calendar', 'v3', http=creds.authorize(Http()))
+
