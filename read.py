@@ -1,22 +1,45 @@
-from apiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
-from pytz import timezone
-from dateutil.parser import parse
-import pytz
-
-from datetime import datetime, timedelta
+"""
+    read.py by Wilka Carvalho
+    This function loads events from your google calendar between two times.
+    It then creates on object with a list of dates, and each date contains information about the events on that date. E.g.,
+    {'days': [{'date': '5/22',
+           'day': 1,
+           'events': [{'calendar': 'cal1',
+                       'summary': 'watch',
+                       'time': '04:00'},
+                      {'calendar': 'cal2',
+                       'summary': 'read',
+                       'time': '18:00'}]},
+          {'date': '5/24',
+           'day': 3,
+           'events': [{'calendar': 'cal2',
+                       'summary': 'read',
+                       'time': '18:00'}]}
+    }
+    This is either printed out or saved to a yaml file. 
+"""
+# python utils
 import yaml
 import pprint
 import argparse
 
+# Google
+from apiclient.discovery import build
+from httplib2 import Http
+from oauth2client import file, client, tools
+
+# date utilities
+from pytz import timezone
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
 
 
 from lib import get_calendars_info, setup_calendar
 
 def read_google_event_time(event):
     # ev_start = event['start'].get('dateTime', event['start'].get('date'))
-    time = event['start'].get('dateTime')
+    time = event['start'].get('dateTime', event['start'].get('date'))
     return parse(time)
 
 def load_events(service, calendars, start, end, maxResults=1000):
@@ -32,7 +55,10 @@ def load_events(service, calendars, start, end, maxResults=1000):
         events[cal] = events_result.get('items', [])
     return events
 
-def display_events(all_events):
+def display_events(all_events, start, end, tz, raw=False):
+    print("Printing all events between:")
+    print("    %s" % start)
+    print("    %s" % end)
     for cal in calendars:
         events = all_events[cal]
 
@@ -41,11 +67,16 @@ def display_events(all_events):
         if not events:
             print('No upcoming events found.')
         for event in events:
-            date = read_google_event_time(event)
+            date = read_google_event_time(event).astimezone(tz)
 
-            print("%d/%d/%d %.2d:%.2d" %(date.month, date.day, date.year, date.hour, date.minute), event['summary'])
+            if raw:
+                # print(date.tzinfo)
+                print(date, event['summary'])
+            else:
+                print("%d/%d/%d %.2d:%.2d" %(date.month, date.day, date.year, date.hour, date.minute), event['summary'])
+            # import ipdb; ipdb.set_trace()
 
-def create_events_object(all_events):
+def create_events_object(all_events, tz):
 
     data = {"days":[]}
     pointers = {}
@@ -54,7 +85,7 @@ def create_events_object(all_events):
         events = all_events[cal]
 
         for event in events:
-            date = read_google_event_time(event)
+            date = read_google_event_time(event).astimezone(tz)
 
             # keep pointers to elements which are accessed by the date
             key = "%d/%d/%d" % (date.month, date.day, date.year)
@@ -120,6 +151,7 @@ parser.add_argument("-s", "--start", default=None, help="start time. format: mon
 parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use end of current day.")
 parser.add_argument("-t", "--timezone", default="US/Pacific")
 parser.add_argument("-v", "--verbose", action='store_true')
+parser.add_argument("-r", "--raw", action='store_true', help="show raw timestamps")
 args = parser.parse_args()
 
 tz = timezone(args.timezone)
@@ -133,13 +165,15 @@ else:
 if args.end: 
     end = datetime.strptime(args.end, format).replace(tzinfo=tz).isoformat()
 else:
+    # end = parse(start) + relativedelta(days=+1)
+    # end = str(end.replace(hour=0,minute=0,tzinfo=tz))
     raise RuntimeError("Not yet implemented when don't set `--end`")
 
 service = setup_calendar()
 calendars = get_calendars_info(service)
 all_events = load_events(service, calendars, start, end)
 
-if args.verbose: display_events(all_events)
+if args.verbose: display_events(all_events, start, end, tz, args.raw)
 if args.file:
-    data = create_events_object(all_events)
+    data = create_events_object(all_events, tz)
     save_events(data, args.file)
