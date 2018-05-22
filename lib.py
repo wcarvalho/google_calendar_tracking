@@ -22,7 +22,7 @@ def get_calendars_info(service, f="calendars.yaml", op='planning', desired_attri
   return calendars
 
 def setup_calendar(credentials="credentials.json", secret="client_secret.json"):
-  SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
+  SCOPES = 'https://www.googleapis.com/auth/calendar'
   store = file.Storage(credentials)
   creds = store.get()
   if not creds or creds.invalid:

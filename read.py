@@ -34,13 +34,14 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 
-
+# this library
 from lib import get_calendars_info, setup_calendar
 
 def read_google_event_time(event):
     # ev_start = event['start'].get('dateTime', event['start'].get('date'))
-    time = event['start'].get('dateTime', event['start'].get('date'))
-    return parse(time)
+    start = event['start'].get('dateTime', event['start'].get('date'))
+    end = event['end'].get('dateTime', event['end'].get('date'))
+    return parse(start), parse(end)
 
 def load_events(service, calendars, start, end, maxResults=1000):
     events = {}
@@ -55,9 +56,9 @@ def load_events(service, calendars, start, end, maxResults=1000):
         events[cal] = events_result.get('items', [])
     return events
 
-def display_events(all_events, start, end, tz, raw=False):
+def display_events(all_events, absolute_start, end, tz, raw=False):
     print("Printing all events between:")
-    print("    %s" % start)
+    print("    %s" % absolute_start)
     print("    %s" % end)
     for cal in calendars:
         events = all_events[cal]
@@ -67,16 +68,18 @@ def display_events(all_events, start, end, tz, raw=False):
         if not events:
             print('No upcoming events found.')
         for event in events:
-            date = read_google_event_time(event).astimezone(tz)
+            start, end = read_google_event_time(event)
+            start = start.astimezone(tz)
+            end = end.astimezone(tz)
+            if start < parse(absolute_start): continue
 
             if raw:
                 # print(date.tzinfo)
-                print(date, event['summary'])
+                print(start, event['summary'])
             else:
-                print("%d/%d/%d %.2d:%.2d" %(date.month, date.day, date.year, date.hour, date.minute), event['summary'])
-            # import ipdb; ipdb.set_trace()
+                print("%d/%d/%d %.2d:%.2d" %(start.month, start.day, start.year, start.hour, start.minute), event['summary'])
 
-def create_events_object(all_events, tz):
+def create_events_object(all_events, absolute_start, tz):
 
     data = {"days":[]}
     pointers = {}
@@ -85,10 +88,13 @@ def create_events_object(all_events, tz):
         events = all_events[cal]
 
         for event in events:
-            date = read_google_event_time(event).astimezone(tz)
+            start, end = read_google_event_time(event)
+            start = start.astimezone(tz)
+            end = end.astimezone(tz)
+            if start < parse(absolute_start): continue
 
-            # keep pointers to elements which are accessed by the date
-            key = "%d/%d/%d" % (date.month, date.day, date.year)
+            # keep pointers to elements which are accessed by the start
+            key = "%d/%d/%d" % (start.month, start.day, start.year)
             if key in pointers:
                 element = pointers[key]
             else:
@@ -97,11 +103,13 @@ def create_events_object(all_events, tz):
                 data["days"].append(element)
 
             # element["day"] = day
-            element["raw"] = str(date)
-            element["date"] = "%d/%d" %(date.month, date.day)
+            element["raw"] = str(start)
+            element["date"] = "%d/%d" %(start.month, start.day)
+
             event_info = {
                 "summary": event["summary"],
-                "time": "%.2d:%.2d" %(date.hour, date.minute),
+                "time": "%.2d:%.2d" %(start.hour, start.minute),
+                "length": int((end-start).total_seconds()/60),
                 "calendar": cal
                     }
             if "events" in element:
@@ -140,10 +148,6 @@ def create_events_object(all_events, tz):
     return data
 
 
-def save_events(data, file):
-    file = open(file, 'w')
-    yaml.dump(data, file)
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--file", default=None, help="if set, will save to this file. currently only support yaml.")
@@ -175,5 +179,6 @@ all_events = load_events(service, calendars, start, end)
 
 if args.verbose: display_events(all_events, start, end, tz, args.raw)
 if args.file:
-    data = create_events_object(all_events, tz)
-    save_events(data, args.file)
+    data = create_events_object(all_events, start, tz)
+    file = open(args.file, 'w')
+    yaml.dump(data, file)

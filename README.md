@@ -18,18 +18,21 @@ Together, I should be able to create, save, load, and move events with these scr
    * ~~read in all the calendar events between a set start and end time~~
    * ~~option to save to yaml file~~
 
-2. **Function: put.py**. 
-   * Using a yaml file, set events for a given day
-   * can also be multi-day
-
-3. **Function: remove.py**. 
+2. **Function: remove.py**. 
    * Clear all the calendar events between a set start and end time
+
+3. **Function: put.py**. 
+   * Using a yaml file, set events for a given day
+      * set events for multiple days (e.g. 2 days of worth of events)
+      * repeat both 1 and 2 days worth of events every 7 days for 100 days
+
 
 4. **Function: move.py**. 
    * Pick calendar(s) and event time-frame and move all events in time-frame up/down by x time (days or hours + minutes or both?)
    * filter for things you don't want to be moved
    * can also move all events starting at event named "x" on day y up. for multiple events of same day, can but `-n` option for which one. e.g from `-e block -n 2` would be block 2.
 
+5. Function that clear previous authorization and redoes authorization
 
 ## Resources
 1. [Google Calendar API](https://developers.google.com/calendar/)
