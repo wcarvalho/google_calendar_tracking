@@ -18,6 +18,15 @@ from datetime import datetime, timedelta
 # this library
 from lib import get_calendars_info, setup_calendar
 
+def load_template(file):
+  # load data from file
+  if not file:
+    raise RuntimeError("Please provide a file to load from.")
+  f = open(file, 'r'); 
+  data={}
+  data.update(yaml.load(f))
+  return data
+
 
 def main():
   parser = argparse.ArgumentParser()
@@ -29,24 +38,14 @@ def main():
   parser.add_argument("-v", "--verbose", action='store_true')
   args = parser.parse_args()
 
-  file=args.file
-  if not file:
-    raise RuntimeError("Please provide a file to load from.")
-  f = open(file, 'r'); 
-  data={}
-  data.update(yaml.load(f))
+  data = load_template(args.file)
 
-  tzfile = tz.gettz(args.timezone)
-
-  if args.start: 
-      start = parse(args.start).replace(hour=0,minute=0,tzinfo=tzfile)
-  else: 
-      start = datetime.now(tz=tz).replace(hour=0,minute=0,tzinfo=tzfile)
+  tzinfo = tz.gettz(args.timezone)
+  start, end = load_start_end(args.start, args.end, tzinfo)
 
   service = setup_calendar()
   calendars = get_calendars_info(service)
 
-  cur_time = start.replace()
   starting_day = data['days'][0]['day']
   for day in data['days']:
     if args.verbose:

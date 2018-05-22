@@ -165,12 +165,6 @@ def main():
     start, end = load_start_end(args.start, args.end, tzinfo)
     all_events = load_events(service, calendars, start, end)
 
-    # event = all_events['misc'][0]
-    # start_time = event['start']['dateTime']
-    # print(start)
-    # print(start_time)
-    # import ipdb; ipdb.set_trace()
-
     if args.verbose: display_events(calendars, all_events, start, end, tzinfo, args.raw)
     if args.file:
         data = create_events_object(calendars, all_events, start, tzinfo)
