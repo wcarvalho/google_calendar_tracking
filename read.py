@@ -79,7 +79,6 @@ def create_events_object(all_events):
                 element["events"] = [event_info]
 
     # sort days by dates
-    #       calculate day by difference (use datetime object??)
     data['days'] = sorted(data['days'], key = lambda x: x["date"])
     
     # sort events within days by time
@@ -87,30 +86,32 @@ def create_events_object(all_events):
         if len(day['events']) > 1:
             day['events'] = sorted(day['events'], 
                                    key = lambda x: x["time"])
-    import ipdb; ipdb.set_trace()
+    
+    data['days'][0]['day'] = 1; 
+    # if only 1 date, set day and return. else calculate difference
+    if len(data['days']) == 0:
+        return data
+    
+    # calculate days by day-differences useing datetime objects via parse
+    day0 = data['days'][0]
+    for day1 in data['days'][1:]:
+        # get datetime objects starting at midnight
+        date0 = parse(day0['raw']).replace(hour=0,minute=0)
+        date1 = parse(day1['raw']).replace(hour=0,minute=0)
+        # get difference in number of days
+        day_difference = date1-date0
+        day_difference = day_difference.days
+        # update 2nd date
+        day1['day'] = day0['day'] + day_difference
+        # update 1st element for loop
+        day0=day1
 
     return data
 
 
-def save_events(all_events, file):
-
-    data = create_events_object(all_events)
-
-
-# {'events': [{'date': '5/21',
-#              'day': 1,
-#              'events': [{'calendar': '1. urgent',
-#                          'summary': 'read',
-#                          'time': 1080},
-#                         {'summary': 'block', 'time': 1410}]},
-#             {'date': '5/22', 'day': 2}]}
-
-
-
+def save_events(data, file):
     file = open(file, 'w')
-            # file.write("%d/%d/%d %.2d:%.2d: %s\n" %(date.month, date.day, date.year, date.hour, date.minute, event['summary']))
-            # ev_start = event['start'].get('dateTime', event['start'].get('date'))
-            # print(ev_start, event['summary'])
+    yaml.dump(data, file)
 
 
 parser = argparse.ArgumentParser()
@@ -139,12 +140,6 @@ calendars = get_calendars_info(service)
 all_events = load_events(service, calendars, start, end)
 
 if args.verbose: display_events(all_events)
-if args.file: 
-    save_events(all_events, args.file)
-
-# start = datetime(2018, 5, 17, 0, 0, 0, tzinfo=tz).isoformat()
-# end = datetime(2018, 5, 17, 23, 30, 0, tzinfo=tz).isoformat()
-
-# print(args)
-# print(end)
-# 
+if args.file:
+    data = create_events_object(all_events)
+    save_events(data, args.file)

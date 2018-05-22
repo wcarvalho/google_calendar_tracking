@@ -16,7 +16,7 @@ Together, I should be able to create, save, load, and move events with these scr
 ## Todo
 1. **Function: read.py**.
    * ~~read in all the calendar events between a set start and end time~~
-   * option to save to yaml file
+   * ~~option to save to yaml file~~
 
 2. **Function: remove.py**. 
    * Clear all the calendar events between a set start and end time
