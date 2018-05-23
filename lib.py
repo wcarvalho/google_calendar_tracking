@@ -33,9 +33,10 @@ def get_calendars_info(service, f="calendars.yaml", op='planning', desired_attri
   while True:
     calendar_list = service.calendarList().list(pageToken=page_token).execute()
     for calendar_list_entry in calendar_list['items']:
-      if calendar_list_entry['summary'] in dic[op]:
+      key=calendar_list_entry['summary'].lower()
+      if key in dic[op]:
           for att in desired_attributes:
-              calendars[calendar_list_entry['summary']][att] = calendar_list_entry[att]
+              calendars[key][att] = calendar_list_entry[att]
     page_token = calendar_list.get('nextPageToken')
     if not page_token:
       break

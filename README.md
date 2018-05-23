@@ -31,7 +31,12 @@ Together, I should be able to create, save, load, and move events with these scr
    * filter for things you don't want to be moved
    * can also move all events starting at event named "x" on day y up. for multiple events of same day, can but `-n` option for which one. e.g from `-e block -n 2` would be block 2.
 
-5. Function that clear previous authorization and redoes authorization
+5. **Function: replace.py**.
+   * replace the contents within a date-range with a template (potentially tiled)
+
+
+
+<!-- 6. Function that clear previous authorization and redoes authorization -->
 
 ## Resources
 1. [Google Calendar API](https://developers.google.com/calendar/)
