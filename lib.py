@@ -19,6 +19,9 @@ def load_start_end(start, end, tzinfo):
   else:
     end= start + timedelta(days=1)
     end = parse(str(end.date())).replace(tzinfo=tzinfo)
+
+  if end <= start:
+    raise RuntimeError("end must be later than start")
   return start, end
 
 def get_calendars_info(service, f="calendars.yaml", op='planning', desired_attributes = ['id']):

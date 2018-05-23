@@ -118,13 +118,13 @@ def create_events_object(calendars, all_events, absolute_start, tz):
                 element["events"] = [event_info]
 
     # sort days by dates
-    data['days'] = sorted(data['days'], key = lambda x: x["date"])
+    data['days'] = sorted(data['days'], key = lambda x: parse(x["date"]))
     
     # sort events within days by time
     for day in data['days']:
         if len(day['events']) > 1:
             day['events'] = sorted(day['events'], 
-                                   key = lambda x: x["time"])
+                                   key = lambda x: parse(x["time"]))
     
     data['days'][0]['day'] = 1; 
     # if only 1 date, set day and return. else calculate difference

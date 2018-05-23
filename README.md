@@ -26,7 +26,6 @@ Together, I should be able to create, save, load, and move events with these scr
       * ~~set events for multiple days (e.g. 2 days of worth of events)~~
       * ~~repeat both `>=1` (e.g. 1 or 2) days worth of events every `d` days `n` times~~
 
-
 4. **Function: move.py**. 
    * Pick calendar(s) and event time-frame and move all events in time-frame up/down by x time (days or hours + minutes or both?)
    * filter for things you don't want to be moved
