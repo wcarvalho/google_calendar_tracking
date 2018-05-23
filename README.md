@@ -23,8 +23,8 @@ Together, I should be able to create, save, load, and move events with these scr
 
 3. **Function: put.py**. 
    * ~~Using a yaml file, set events for a given day~~
-      * set events for multiple days (e.g. 2 days of worth of events)
-      * repeat both 1 and 2 days worth of events every 7 days for 100 days
+      * ~~set events for multiple days (e.g. 2 days of worth of events)~~
+      * ~~repeat both `>=1` (e.g. 1 or 2) days worth of events every `d` days `n` times~~
 
 
 4. **Function: move.py**. 
