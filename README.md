@@ -24,34 +24,34 @@ You want create and experiment with multiple calendar templates to see which is 
 ## Todo
 
 ### Main Functions
-1. **Function: read.py**.
+1. **read.py**
    * ~~read in all the calendar events between a set start and end time~~
    * ~~option to save to yaml file~~
 
-2. **Function: clear.py**. 
+2. **clear.py** 
    * ~~Clear all the calendar events between a set start and end time~~
    * remove a single event or set of events in a time-range by the event name(s)
 
-3. **Function: put.py**. 
+3. **put.py** 
    * ~~Using a yaml file, set events for a given day~~
       * ~~set events for multiple days (e.g. 2 days of worth of events)~~
       * ~~repeat both `>=1` (e.g. 1 or 2) days worth of events every `d` days `n` times~~
 
-4. **Function: move.py**. 
+4. **move.py** 
    * Pick calendar(s) and event time-frame and move all events in time-frame up/down by x time (days or hours + minutes or both?)
    * filter for things you don't want to be moved
    * can also move all events starting at event named "x" on day y up. for multiple events of same day, can but `-n` option for which one. e.g from `-e block -n 2` would be block 2.
 
-5. **Function: replace.py**.
+5. **replace.py**
    * replace the contents within a date-range with a template (potentially tiled)
 
-6. **Function: required_time.py**
+6. **required_time.py**
    * calculates how much time you need for tasks in a task list defined by a yaml file
 
-7. **Function: available_time.py**
+7. **available_time.py**
    * Calculate some information on whether you have enough time for your tasks, and by how much if so (i.e. your buffer).
 
-8. **Function: replicate.py**
+8. **replicate.py**
    * saves a time-span, tiles across a choice of dates, and calculates how well time goes for required tasks. Based on above workflow.
 
 ### Other
