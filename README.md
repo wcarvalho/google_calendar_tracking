@@ -30,6 +30,7 @@ You want create and experiment with multiple calendar templates to see which is 
 
 2. **Function: clear.py**. 
    * ~~Clear all the calendar events between a set start and end time~~
+   * remove a single event or set of events in a time-range by the event name(s)
 
 3. **Function: put.py**. 
    * ~~Using a yaml file, set events for a given day~~
@@ -50,13 +51,15 @@ You want create and experiment with multiple calendar templates to see which is 
 7. **Function: available_time.py**
    * Calculate some information on whether you have enough time for your tasks, and by how much if so (i.e. your buffer).
 
-8. **Function: template.py**
+8. **Function: replicate.py**
    * saves a time-span, tiles across a choice of dates, and calculates how well time goes for required tasks. Based on above workflow.
 
 ### Other
 1. A system of templates, their descriptions/notes with potential to add photos. This auto-populate PDF (or something).
 1. Default settings yaml file (for things like timezone)
-1. Function that clear previous authorization and redoes authorization
+1. common command-line args across files.
+   a. can input calendars from command line (currently just settings file)
+<!-- 1. Function that clears previous authorization and redoes authorization -->
 
 ## Resources
 1. [Google Calendar API](https://developers.google.com/calendar/)
