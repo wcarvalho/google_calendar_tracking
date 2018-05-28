@@ -7,6 +7,14 @@ I've wanted to template my calendars for years. I think each week is different, 
 
 Together, I should be able to create, save, load, and move events with these scripts. And I think this will facilitate maintaining and editing templates.
 
+## Workflow
+You want create and experiment with multiple calendar templates to see which is best. For each one:
+  1. Create a template for a week (or some time-length)
+  1. Clear across dates that you want to apply this template (from appropriate calendars)
+  1. Place from template across those dates
+  1. run time-availability script to see buffer
+
+
 ## Getting Started
 * Follow [these steps](https://developers.google.com/calendar/quickstart/python) to 
   * turn on the Google Calendar API for this app and 
@@ -14,6 +22,8 @@ Together, I should be able to create, save, load, and move events with these scr
 
 
 ## Todo
+
+### Main Functions
 1. **Function: read.py**.
    * ~~read in all the calendar events between a set start and end time~~
    * ~~option to save to yaml file~~
@@ -34,9 +44,19 @@ Together, I should be able to create, save, load, and move events with these scr
 5. **Function: replace.py**.
    * replace the contents within a date-range with a template (potentially tiled)
 
+6. **Function: required_time.py**
+   * calculates how much time you need for tasks in a task list defined by a yaml file
 
+7. **Function: available_time.py**
+   * Calculate some information on whether you have enough time for your tasks, and by how much if so (i.e. your buffer).
 
-<!-- 6. Function that clear previous authorization and redoes authorization -->
+8. **Function: template.py**
+   * saves a time-span, tiles across a choice of dates, and calculates how well time goes for required tasks. Based on above workflow.
+
+### Other
+1. A system of templates, their descriptions/notes with potential to add photos. This auto-populate PDF (or something).
+1. Default settings yaml file (for things like timezone)
+1. Function that clear previous authorization and redoes authorization
 
 ## Resources
 1. [Google Calendar API](https://developers.google.com/calendar/)

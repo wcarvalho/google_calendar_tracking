@@ -16,16 +16,7 @@ from dateutil import tz
 from datetime import datetime, timedelta
 
 # this library
-from lib import get_calendars_info, setup_calendar, load_start_end
-
-def load_template(file):
-  # load data from file
-  if not file:
-    raise RuntimeError("Please provide a file to load from.")
-  f = open(file, 'r'); 
-  data={}
-  data.update(yaml.load(f))
-  return data
+from lib import get_calendars_info, setup_calendar, load_start_end, load_yaml
 
 def put_events(data, calendars, service, start, timezone, verbose=False):
 
@@ -58,6 +49,9 @@ def put_events(data, calendars, service, start, timezone, verbose=False):
       if verbose:
         print("%s %s: %s" % (str(event_time.date()), str(event_time.time()), event['summary']))
 
+
+def tile(every_n=1, until=None): pass
+
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("-f", "--file", default=None, help="yaml file to load data from.")
@@ -68,7 +62,7 @@ def main():
   parser.add_argument("-v", "--verbose", action='store_true')
   args = parser.parse_args()
 
-  data = load_template(args.file)
+  data = load_yaml(args.file)
 
   tzinfo = tz.gettz(args.timezone)
   start, end = load_start_end(args.start, args.end, tzinfo)

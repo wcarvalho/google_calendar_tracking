@@ -6,6 +6,15 @@ from dateutil.parser import parse
 from datetime import timedelta
 import yaml
 
+def load_yaml(file):
+  # load data from file
+  if not file:
+    raise RuntimeError("Please provide a file to load from.")
+  f = open(file, 'r'); 
+  data={}
+  data.update(yaml.load(f))
+  return data
+
 def load_start_end(start, end, tzinfo):
   # tzinfo info:
       # replace: keeps current time and uses timezone
