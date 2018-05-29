@@ -3,4 +3,5 @@ client_secret.json
 calendars.yaml
 __pycache__/
 *.ipynb_checkpoints*
-**temp**
+*temp*
+*sublime*

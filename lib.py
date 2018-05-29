@@ -3,7 +3,7 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 
 from dateutil.parser import parse
-from datetime import timedelta
+from datetime import datetime, timedelta
 import yaml
 
 def load_yaml(file):
@@ -33,20 +33,23 @@ def load_start_end(start, end, tzinfo):
     raise RuntimeError("end must be later than start")
   return start, end
 
-def get_calendars_info(service, f="calendars.yaml", op='planning', desired_attributes = ['id']):
+def load_calendars_from_file(f="calendars.yaml", op='planning'):
   stream = open(f, 'r')
   dic = next(yaml.load_all(stream))
-  calendars = {p: {} for p in dic[op]}
+  return [i for i in dic[op]]
+
+def get_calendars_info(service, calendar_names, desired_attributes = ['id']):
+  calendars = {c: {} for c in calendar_names}
   
   page_token = None
   while True:
-    calendar_list = service.calendarList().list(pageToken=page_token).execute()
-    for calendar_list_entry in calendar_list['items']:
+    google_calendars = service.calendarList().list(pageToken=page_token).execute()
+    for calendar_list_entry in google_calendars['items']:
       key=calendar_list_entry['summary'].lower()
-      if key in dic[op]:
+      if key in calendar_names:
           for att in desired_attributes:
               calendars[key][att] = calendar_list_entry[att]
-    page_token = calendar_list.get('nextPageToken')
+    page_token = google_calendars.get('nextPageToken')
     if not page_token:
       break
   return calendars

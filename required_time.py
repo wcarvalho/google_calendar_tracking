@@ -1,3 +1,7 @@
+"""
+    required_time.py by Wilka Carvalho
+"""
+
 import yaml
 import argparse
 import pprint
@@ -18,14 +22,14 @@ def required_time(data, tasks):
 
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument("-f", "--file", default=None, help="yaml file to load data from.")
+  parser.add_argument("-f", "--file", default=None, help="yaml file to load task data from.")
   args = parser.parse_args()
 
   data = load_yaml(args.file)
   
   tasks = list(data.keys())
   time_needed = required_time(data, tasks)
-  print("Time needed for tasks is %d hours" %time_needed )
+  print("Time needed for tasks is %d hours" % time_needed )
 
 
 if __name__ == '__main__':

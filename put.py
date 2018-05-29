@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 # this library
 from lib import get_calendars_info, setup_calendar, load_start_end, load_yaml
 
-def put_events(data, calendars, service, start, timezone, verbose=False):
+def put_events(data, calendars, service, start, timezone, verbose=False, test_only=False):
 
   starting_day = data['days'][0]['day']
   for day in data['days']:
@@ -33,19 +33,20 @@ def put_events(data, calendars, service, start, timezone, verbose=False):
       hour, minute = [int(i) for i in event['time'].split(":")]
       event_time = cur_time.replace(hour=hour, minute=minute)
 
-      event_json = {
-        'summary': event['summary'],
-        'start': {
-          'dateTime': str(event_time.isoformat()),
-          'timeZone': timezone,
-        },
-        'end': {
-          'dateTime': str((event_time + timedelta(minutes=event['length'])).isoformat()),
-          'timeZone': timezone,
+      if not test_only:
+        event_json = {
+          'summary': event['summary'],
+          'start': {
+            'dateTime': str(event_time.isoformat()),
+            'timeZone': timezone,
+          },
+          'end': {
+            'dateTime': str((event_time + timedelta(minutes=event['length'])).isoformat()),
+            'timeZone': timezone,
+          }
         }
-      }
-      calendarId = calendars[event['calendar']]['id']
-      event = service.events().insert(calendarId=calendarId, body=event_json).execute()
+        calendarId = calendars[event['calendar']]['id']
+        event = service.events().insert(calendarId=calendarId, body=event_json).execute()
       if verbose:
         print("%s %s: %s" % (str(event_time.date()), str(event_time.time()), event['summary']))
 
@@ -60,6 +61,7 @@ def main():
   parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use end of current day.")
   parser.add_argument("-t", "--timezone", default="US/Pacific")
   parser.add_argument("-v", "--verbose", action='store_true')
+  parser.add_argument("-T", "--test-only", action='store_true')
   args = parser.parse_args()
 
   data = load_yaml(args.file)
@@ -68,7 +70,8 @@ def main():
   start, end = load_start_end(args.start, args.end, tzinfo)
 
   service = setup_calendar()
-  calendars = get_calendars_info(service)
+  calendar_list = load_calendars_from_file()
+  calendars = get_calendars_info(service, calendar_list)
 
   if args.repeat:
     # import ipdb; ipdb.set_trace()
@@ -87,24 +90,24 @@ def main():
     indx = 0
     while (True):
       # get start date & end_date
-      start = start + timedelta(days=indx*args.repeat)
+      start = start + timedelta(days=args.repeat if indx else indx)
       end_date = start + timedelta(days=template_length)
       if end_date >= end:
         if args.verbose:
-          print("Finished on dates: %s - %s " % (str(start.date()), str(end_date.date())))
+          print("Finished on %s - %s " % (str(start.date()), str(end_date.date())))
           if not indx: 
             print("Didn't repeat. Maybe change your end date to some further in the future?")
         break
       # if end_date is before end, place events
       if args.verbose:
         print()
-        print("Instance %d" % indx)
-      put_events(data, calendars, service, start, args.timezone, args.verbose)
+        print("Instance %d: %s - %s" % (indx, str(start.date()), str(end_date.date())))
+      put_events(data, calendars, service, start, args.timezone, args.verbose, args.test_only)
 
       indx += 1
 
   else:
-    put_events(data, calendars, service, start, args.timezone, args.verbose)
+    put_events(data, calendars, service, start, args.timezone, args.verbose, args.test_only)
   # pprint.pprint(data)
   # 
 

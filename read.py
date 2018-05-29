@@ -23,19 +23,13 @@ import yaml
 import pprint
 import argparse
 
-# Google
-from apiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
-
 # date utilities
-from pytz import timezone
 from dateutil.parser import parse
 from dateutil import tz
 from datetime import datetime, timedelta
 
 # this library
-from lib import get_calendars_info, setup_calendar, load_start_end
+from lib import get_calendars_info, load_calendars_from_file, setup_calendar, load_start_end
 
 def read_google_event_time(event):
     # ev_start = event['start'].get('dateTime', event['start'].get('date'))
@@ -57,6 +51,7 @@ def load_events(service, calendars, start, end, maxResults=1000):
     return events
 
 def display_events(calendars, all_events, absolute_start, end, tz, raw=False):
+
     print("Printing all events between:")
     print("    %s" % absolute_start)
     print("    %s" % end)
@@ -159,7 +154,8 @@ def main():
 
 
     service = setup_calendar()
-    calendars = get_calendars_info(service)
+    calendar_list = load_calendars_from_file()
+    calendars = get_calendars_info(service, calendar_list)
 
     tzinfo = tz.gettz(args.timezone)
     start, end = load_start_end(args.start, args.end, tzinfo)
