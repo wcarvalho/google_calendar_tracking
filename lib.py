@@ -15,10 +15,25 @@ def load_yaml(file):
   data.update(yaml.load(f))
   return data
 
+def flatten_events(events_calendar_dic):
+    """Take a dictionary of that maps calendar name to events and return a long list of all the events. the events are themselves dics and will now have an entry that maps to the calendar name
+    """
+
+    events = []
+    for calendar, events_list in events_calendar_dic.items():
+      for event in events_list:
+        event['calendar'] = calendar
+      events += events_list
+
+    return events
+
+
+
+
 def load_start_end(start, end, tzinfo):
   # tzinfo info:
-      # replace: keeps current time and uses timezone
-      # astimezone: converts time to that timezone
+  # replace: keeps current time and uses timezone
+  # astimezone: converts time to that timezone
   if start: 
     start = parse(start).replace(tzinfo=tzinfo)
   else: 

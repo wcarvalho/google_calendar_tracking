@@ -50,6 +50,7 @@ You want create and experiment with multiple calendar templates to see which is 
 
 7. **available_time.py**
    * Calculate some information on whether you have enough time for your tasks, and by how much if so (i.e. your buffer).
+   * support for multiple calendars per task (currently a task can only be checked on one calendar)
 
 8. **replicate.py**
    * saves a time-span, tiles across a choice of dates, and calculates how well time goes for required tasks. Based on above workflow.
