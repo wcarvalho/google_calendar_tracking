@@ -42,7 +42,6 @@ def calculate_time_availability_by_calendar(events, tasks, end, tzinfo):
         task['end'] = task['end'] if task['end'] > end else end
       else:
         task['end'] = end
-        # task['end'] = parse(task['end']).replace(tzinfo=tzinfo)
 
   tasks = sorted(tasks, key = lambda x: x['end'])
 
@@ -77,6 +76,7 @@ def calculate_time_availability_by_calendar(events, tasks, end, tzinfo):
   not_completed = []
   extra_required = 0
   for task in tasks:
+    if task['end'] > end: continue
     duedate = task['end'] + timedelta(days=1) # to include that day in the available time
 
     # if looking at new duedate, add available time from calendars
@@ -108,7 +108,7 @@ def calculate_time_availability_by_calendar(events, tasks, end, tzinfo):
 
   if extra_required:
     print()
-    print("To complete the remaining tasks you need %.1f hour" % (extra_required/60.0))
+    print("To complete the remaining tasks you need %.1f more hours" % (extra_required/60.0))
     for task in not_completed:
       print("\t%s, %.1f hr" %(task[0], task[1]))
 

@@ -51,7 +51,42 @@ def put_events(data, calendars, service, start, timezone, verbose=False, test_on
         print("%s %s: %s" % (str(event_time.date()), str(event_time.time()), event['summary']))
 
 
-def tile(every_n=1, until=None): pass
+def tile(data, calendars, service, start, end, timezone, repeat=None, verbose=False, test_only=False):
+  # import ipdb; ipdb.set_trace()
+  day_1 = data['days'][0]['day']
+  day_n = data['days'][-1]['day']
+  template_length = day_n - day_1
+
+  # if don't define repetition, will tile one longer than template length
+  if not repeat: repeat = template_length + 1
+  
+  if repeat <= template_length: 
+    raise RuntimeError(
+      """
+      Your repeat frequency and your template length overlap.
+      E.g., If end day is 7 (e.g. Sunday) and start day is 1 (e.g. Monday)
+      then the minimum repeat time is 7 > (7-1). Anything less, and there's overlap.
+      """
+      )
+  end_date = start + timedelta(days=template_length)
+  indx = 0
+  while (True):
+    # get start date & end_date
+    start = start + timedelta(days=args.repeat if indx else indx)
+    end_date = start + timedelta(days=template_length)
+    if end_date >= end:
+      if args.verbose:
+        print("Finished on %s - %s " % (str(start.date()), str(end_date.date())))
+        if not indx: 
+          print("Didn't repeat. Maybe change your end date to some further in the future?")
+      break
+    # if end_date is before end, place events
+    if args.verbose:
+      print()
+      print("Instance %d: %s - %s" % (indx, str(start.date()), str(end_date.date())))
+    put_events(data, calendars, service, start, timezone, verbose,test_only)
+
+    indx += 1
 
 def main():
   parser = argparse.ArgumentParser()
@@ -74,43 +109,46 @@ def main():
   calendars = get_calendars_info(service, calendar_list)
 
   if args.repeat:
-    # import ipdb; ipdb.set_trace()
-    day_1 = data['days'][0]['day']
-    day_n = data['days'][-1]['day']
-    template_length = day_n - day_1
-    if args.repeat <= template_length: 
-      raise RuntimeError(
-        """
-        Your repeat frequency and your template length overlap.
-        E.g., If end day is 7 (e.g. Sunday) and start day is 1 (e.g. Monday)
-        then the minimum repeat time is 7 > (7-1). Anything less, and there's overlap.
-        """
-        )
-    end_date = start + timedelta(days=template_length)
-    indx = 0
-    while (True):
-      # get start date & end_date
-      start = start + timedelta(days=args.repeat if indx else indx)
-      end_date = start + timedelta(days=template_length)
-      if end_date >= end:
-        if args.verbose:
-          print("Finished on %s - %s " % (str(start.date()), str(end_date.date())))
-          if not indx: 
-            print("Didn't repeat. Maybe change your end date to some further in the future?")
-        break
-      # if end_date is before end, place events
-      if args.verbose:
-        print()
-        print("Instance %d: %s - %s" % (indx, str(start.date()), str(end_date.date())))
-      put_events(data, calendars, service, start, args.timezone, args.verbose, args.test_only)
-
-      indx += 1
-
+    tile(data, calendars, service, start, end, args.timezone, args.repeat, args.verbose, args.test_only)
   else:
     put_events(data, calendars, service, start, args.timezone, args.verbose, args.test_only)
-  # pprint.pprint(data)
-  # 
 
 
 if __name__ == "__main__":
     main()
+
+
+
+
+# # import ipdb; ipdb.set_trace()
+# day_1 = data['days'][0]['day']
+# day_n = data['days'][-1]['day']
+# template_length = day_n - day_1
+# if args.repeat <= template_length: 
+#   raise RuntimeError(
+#     """
+#     Your repeat frequency and your template length overlap.
+#     E.g., If end day is 7 (e.g. Sunday) and start day is 1 (e.g. Monday)
+#     then the minimum repeat time is 7 > (7-1). Anything less, and there's overlap.
+#     """
+#     )
+# end_date = start + timedelta(days=template_length)
+# indx = 0
+# while (True):
+#   # get start date & end_date
+#   start = start + timedelta(days=args.repeat if indx else indx)
+#   end_date = start + timedelta(days=template_length)
+#   if end_date >= end:
+#     if args.verbose:
+#       print("Finished on %s - %s " % (str(start.date()), str(end_date.date())))
+#       if not indx: 
+#         print("Didn't repeat. Maybe change your end date to some further in the future?")
+#     break
+#   # if end_date is before end, place events
+#   if args.verbose:
+#     print()
+#     print("Instance %d: %s - %s" % (indx, str(start.date()), str(end_date.date())))
+#   put_events(data, calendars, service, start, args.timezone, args.verbose, args.test_only)
+
+#   indx += 1
+

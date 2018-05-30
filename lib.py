@@ -39,7 +39,8 @@ def load_start_end(start, end, tzinfo):
   else: 
     start = datetime.now(tz=tzinfo)
   if end: 
-    end = parse(end).replace(tzinfo=tzinfo)
+    # inclusive of current date
+    end = parse(end).replace(tzinfo=tzinfo) + timedelta(days=1)
   else:
     end= start + timedelta(days=1)
     end = parse(str(end.date())).replace(tzinfo=tzinfo)

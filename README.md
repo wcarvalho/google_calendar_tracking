@@ -46,7 +46,7 @@ You want create and experiment with multiple calendar templates to see which is 
    * replace the contents within a date-range with a template (potentially tiled)
 
 6. **required_time.py**
-   * calculates how much time you need for tasks in a task list defined by a yaml file
+   * ~~calculates how much time you need for tasks in a task list defined by a yaml file~~
 
 7. **available_time.py**
    * ~~Calculate some information on whether you have enough time for your tasks, and by how much if so (i.e. your buffer).~~
