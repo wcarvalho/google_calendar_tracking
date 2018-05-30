@@ -74,7 +74,8 @@ def calculate_time_availability_by_calendar(events, tasks, end, tzinfo):
   calendar_time = 0
   prev_duedate = None
   # completed = []
-  # not_completed = []
+  not_completed = []
+  extra_required = 0
   for task in tasks:
     duedate = task['end'] + timedelta(days=1) # to include that day in the available time
 
@@ -96,10 +97,20 @@ def calculate_time_availability_by_calendar(events, tasks, end, tzinfo):
 
     if calendar_time < 0:
       calendar_time += task_time
-      print()
-      print("There is not enough time to complete %s: %s" % (task['category'], task['name']))
-      print("Available time: %d | Task time: %d" %(calendar_time, task_time))
+      extra_required += task_time
+      not_completed.append((
+        "%s: %s" % (task['category'], task['name']),
+        task_time/60.0
+        ))
+      # print()
+      # print("There is not enough time to complete %s: %s" % (task['category'], task['name']))
+      # print("Available time: %.1f hr | Task time: %.1f hr" %(calendar_time/60.0, task_time/60.0))
 
+  if extra_required:
+    print()
+    print("To complete the remaining tasks you need %.1f hour" % (extra_required/60.0))
+    for task in not_completed:
+      print("\t%s, %.1f hr" %(task[0], task[1]))
 
 def main():
     parser = argparse.ArgumentParser()

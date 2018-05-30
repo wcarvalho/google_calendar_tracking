@@ -49,7 +49,7 @@ You want create and experiment with multiple calendar templates to see which is 
    * calculates how much time you need for tasks in a task list defined by a yaml file
 
 7. **available_time.py**
-   * Calculate some information on whether you have enough time for your tasks, and by how much if so (i.e. your buffer).
+   * ~~Calculate some information on whether you have enough time for your tasks, and by how much if so (i.e. your buffer).~~
    * support for multiple calendars per task (currently a task can only be checked on one calendar)
 
 8. **replicate.py**
