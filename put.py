@@ -16,7 +16,8 @@ from dateutil import tz
 from datetime import datetime, timedelta
 
 # this library
-from lib import get_calendars_info, setup_calendar, load_start_end, load_yaml
+from lib import get_calendars_info, setup_calendar, load_start_end, load_yaml, load_calendars_from_file
+from clear import clear_events
 
 def put_events(data, calendars, service, start, timezone, verbose=False, test_only=False):
 
@@ -72,16 +73,16 @@ def tile(data, calendars, service, start, end, timezone, repeat=None, verbose=Fa
   indx = 0
   while (True):
     # get start date & end_date
-    start = start + timedelta(days=args.repeat if indx else indx)
+    start = start + timedelta(days=repeat if indx else indx)
     end_date = start + timedelta(days=template_length)
     if end_date >= end:
-      if args.verbose:
+      if verbose:
         print("Finished on %s - %s " % (str(start.date()), str(end_date.date())))
         if not indx: 
           print("Didn't repeat. Maybe change your end date to some further in the future?")
       break
     # if end_date is before end, place events
-    if args.verbose:
+    if verbose:
       print()
       print("Instance %d: %s - %s" % (indx, str(start.date()), str(end_date.date())))
     put_events(data, calendars, service, start, timezone, verbose,test_only)
@@ -96,6 +97,7 @@ def main():
   parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use end of current day.")
   parser.add_argument("-t", "--timezone", default="US/Pacific")
   parser.add_argument("-v", "--verbose", action='store_true')
+  parser.add_argument("-c", "--clear", action='store_true')
   parser.add_argument("-T", "--test-only", action='store_true')
   args = parser.parse_args()
 
@@ -108,6 +110,10 @@ def main():
   calendar_list = load_calendars_from_file()
   calendars = get_calendars_info(service, calendar_list)
 
+  if args.clear:
+    # if clear, remove all events in that range already
+    clear_events(service, calendars, start, end, tzinfo, args.verbose)
+
   if args.repeat:
     tile(data, calendars, service, start, end, args.timezone, args.repeat, args.verbose, args.test_only)
   else:
@@ -116,39 +122,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-# # import ipdb; ipdb.set_trace()
-# day_1 = data['days'][0]['day']
-# day_n = data['days'][-1]['day']
-# template_length = day_n - day_1
-# if args.repeat <= template_length: 
-#   raise RuntimeError(
-#     """
-#     Your repeat frequency and your template length overlap.
-#     E.g., If end day is 7 (e.g. Sunday) and start day is 1 (e.g. Monday)
-#     then the minimum repeat time is 7 > (7-1). Anything less, and there's overlap.
-#     """
-#     )
-# end_date = start + timedelta(days=template_length)
-# indx = 0
-# while (True):
-#   # get start date & end_date
-#   start = start + timedelta(days=args.repeat if indx else indx)
-#   end_date = start + timedelta(days=template_length)
-#   if end_date >= end:
-#     if args.verbose:
-#       print("Finished on %s - %s " % (str(start.date()), str(end_date.date())))
-#       if not indx: 
-#         print("Didn't repeat. Maybe change your end date to some further in the future?")
-#     break
-#   # if end_date is before end, place events
-#   if args.verbose:
-#     print()
-#     print("Instance %d: %s - %s" % (indx, str(start.date()), str(end_date.date())))
-#   put_events(data, calendars, service, start, args.timezone, args.verbose, args.test_only)
-
-#   indx += 1
 

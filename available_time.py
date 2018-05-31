@@ -75,6 +75,7 @@ def calculate_time_availability_by_calendar(events, tasks, end, tzinfo):
   # completed = []
   not_completed = []
   extra_required = 0
+  total_required = 0
   for task in tasks:
     if task['end'] > end: continue
     duedate = task['end'] + timedelta(days=1) # to include that day in the available time
@@ -91,6 +92,7 @@ def calculate_time_availability_by_calendar(events, tasks, end, tzinfo):
     if 'repeat' in task: task_time *= int(task['repeat'])
     # subtract time
     calendar_time -= task_time
+    total_required += task_time
 
     # update duedate
     prev_duedate = duedate
@@ -102,9 +104,9 @@ def calculate_time_availability_by_calendar(events, tasks, end, tzinfo):
         "%s: %s" % (task['category'], task['name']),
         task_time/60.0
         ))
-      # print()
-      # print("There is not enough time to complete %s: %s" % (task['category'], task['name']))
-      # print("Available time: %.1f hr | Task time: %.1f hr" %(calendar_time/60.0, task_time/60.0))
+      print()
+      print("There is not enough time to complete %s: %s" % (task['category'], task['name']))
+      print("Available time: %.1f hr | Task time: %.1f hr" %(calendar_time/60.0, task_time/60.0))
 
   if extra_required:
     print()
@@ -112,6 +114,10 @@ def calculate_time_availability_by_calendar(events, tasks, end, tzinfo):
     for task in not_completed:
       print("\t%s, %.1f hr" %(task[0], task[1]))
 
+  print()
+  print("Your required time is %.1f hours" % (total_required/60.0))
+  print("Your available buffer is %.1f hours" % (calendar_time/60.0))
+  print("We recommend a buffer above %.1f hours" % (total_required*.05/60.0))
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", default=None, help="yaml file to load task data from.")

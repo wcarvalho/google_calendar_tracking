@@ -18,7 +18,8 @@ from datetime import datetime, timedelta
 # this library
 from lib import get_calendars_info, setup_calendar, load_start_end, load_yaml, load_calendars_from_file
 from read import load_events, create_events_object
-from clear import delete_events
+from clear import clear_events
+from put import tile
 
 def main():
   parser = argparse.ArgumentParser()
@@ -49,9 +50,8 @@ def main():
 
   if args.clear:
     # if clear, remove all events in that range already
-    clear_events = load_events(service, calendars, repeat_start, repeat_end)
-    delete_events(service, calendars, clear_events, repeat_start, tzinfo, args.verbose)
-  
+    clear_events(service, calendars, repeat_start, repeat_end, tzinfo, args.verbose)
+
   tile(data, calendars, service, repeat_start, repeat_end, args.timezone, args.repeat, args.verbose, args.test_only)
 
 

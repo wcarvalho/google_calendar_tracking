@@ -36,6 +36,10 @@ def delete_events(service, calendars, all_events, absolute_start, timezone, verb
           print("Deleting %d/%d/%d %.2d:%.2d %s" %(start.month, start.day, start.year, start.hour, start.minute, event['summary']))
         service.events().delete(calendarId=calendars[cal]['id'], eventId=event['id']).execute()
 
+def clear_events(service, calendars, start, end, tzinfo, verbose):
+  all_events = load_events(service, calendars, start, end)
+  delete_events(service, calendars, all_events, start, tzinfo, verbose)
+
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("-s", "--start", default=None, help="start time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use current time.")
@@ -52,8 +56,7 @@ def main():
   service = setup_calendar()
   calendar_list = load_calendars_from_file()
   calendars = get_calendars_info(service, calendar_list)
-  all_events = load_events(service, calendars, start, end)
-  delete_events(service, calendars, all_events, start, tzinfo, args.verbose)
+  clear_events(service, calendars, start, end, tzinfo, args.verbose)
 
 if __name__ == "__main__":
     main()
