@@ -42,8 +42,9 @@ You want create and experiment with multiple calendar templates to see which is 
    * filter for things you don't want to be moved
    * can also move all events starting at event named "x" on day y up. for multiple events of same day, can but `-n` option for which one. e.g from `-e block -n 2` would be block 2.
 
-5. **replace.py**
-   * replace the contents within a date-range with a template (potentially tiled)
+5. **replicate.py**
+   * ~~replace the contents within a date-range with that from another date-range (potentially tiled)~~
+   * option to replace from file
 
 6. **required_time.py**
    * ~~calculates how much time you need for tasks in a task list defined by a yaml file~~
@@ -52,8 +53,6 @@ You want create and experiment with multiple calendar templates to see which is 
    * ~~Calculate some information on whether you have enough time for your tasks, and by how much if so (i.e. your buffer).~~
    * support for multiple calendars per task (currently a task can only be checked on one calendar)
 
-8. **replicate.py**
-   * saves a time-span, tiles across a choice of dates, and calculates how well time goes for required tasks. Based on above workflow.
 
 ### Other
 1. A system of templates, their descriptions/notes with potential to add photos. This auto-populate PDF (or something).

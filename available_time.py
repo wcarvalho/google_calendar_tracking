@@ -137,7 +137,7 @@ def main():
     calendars = get_calendars_info(service, calendar_names)
 
     start, end = load_start_end(args.start, args.end, tzinfo)
-    all_events = load_events(service, calendars, start, end)
+    all_events = load_events(service, calendars, start, end, tzinfo)
     
     # have dict of calendar -> relevant events
     tasks_by_calendar = {cal:[] for cal in calendars}

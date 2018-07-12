@@ -40,7 +40,7 @@ def main():
 
   # get the events to replicate in desired date range
   base_start, base_end = load_start_end(args.base_range[0], args.base_range[1], tzinfo)
-  all_events = load_events(service, calendars, base_start, base_end)
+  all_events = load_events(service, calendars, base_start, base_end, tzinfo)
 
   # create event object data to tile
   data = create_events_object(calendars, all_events, base_start, tzinfo)
@@ -50,7 +50,7 @@ def main():
 
   if args.clear:
     # if clear, remove all events in that range already
-    clear_events(service, calendars, repeat_start, repeat_end, tzinfo, args.verbose)
+    clear_events(service, calendars, repeat_start, repeat_end, tzinfo, args.test_only, args.verbose)
 
   tile(data, calendars, service, repeat_start, repeat_end, args.timezone, args.repeat, args.verbose, args.test_only)
 

@@ -6,6 +6,17 @@ from dateutil.parser import parse
 from datetime import datetime, timedelta
 import yaml
 
+
+def apply_to_events(events, fn, *args, **kwargs):
+  for event in events:
+    fn(*([event] + list(args)), **kwargs)
+
+def read_google_event_time(event):
+  # ev_start = event['start'].get('dateTime', event['start'].get('date'))
+  start = event['start'].get('dateTime', event['start'].get('date'))
+  end = event['end'].get('dateTime', event['end'].get('date'))
+  return parse(start), parse(end)
+
 def load_yaml(file):
   # load data from file
   if not file:
@@ -15,20 +26,18 @@ def load_yaml(file):
   data.update(yaml.load(f))
   return data
 
-def flatten_events(events_calendar_dic):
-    """Take a dictionary of that maps calendar name to events and return a long list of all the events. the events are themselves dics and will now have an entry that maps to the calendar name
-    """
+def flatten_events(events_calendar_dic, sort=False):
+  """Take a dictionary of that maps calendar name to events and return a long list of all the events. the events are themselves dics and will now have an entry that maps to the calendar name
+  """
 
-    events = []
-    for calendar, events_list in events_calendar_dic.items():
-      for event in events_list:
-        event['calendar'] = calendar
-      events += events_list
+  events = []
+  for calendar, events_list in events_calendar_dic.items():
+    for event in events_list:
+      event['calendar'] = calendar
+    events += events_list
 
-    return events
-
-
-
+  if sort: return sorted(events, key = lambda x: parse(x['start']['dateTime']))
+  return events
 
 def load_start_end(start, end, tzinfo):
   # tzinfo info:
@@ -40,9 +49,9 @@ def load_start_end(start, end, tzinfo):
     start = datetime.now(tz=tzinfo)
   if end: 
     # inclusive of current date
-    end = parse(end).replace(tzinfo=tzinfo) + timedelta(days=1)
+    end = parse(end).replace(tzinfo=tzinfo)
   else:
-    end= start + timedelta(days=1)
+    end = start + timedelta(days=1)
     end = parse(str(end.date())).replace(tzinfo=tzinfo)
 
   if end <= start:

@@ -29,15 +29,9 @@ from dateutil import tz
 from datetime import datetime, timedelta
 
 # this library
-from lib import get_calendars_info, load_calendars_from_file, setup_calendar, load_start_end
+from lib import *
 
-def read_google_event_time(event):
-    # ev_start = event['start'].get('dateTime', event['start'].get('date'))
-    start = event['start'].get('dateTime', event['start'].get('date'))
-    end = event['end'].get('dateTime', event['end'].get('date'))
-    return parse(start), parse(end)
-
-def load_events(service, calendars, start, end, maxResults=1000):
+def load_events(service, calendars, start, end, timezone, maxResults=1000):
     events = {}
     for cal in calendars:
         id = calendars[cal]['id']
@@ -47,11 +41,23 @@ def load_events(service, calendars, start, end, maxResults=1000):
             timeMax=end.isoformat(),
             maxResults=maxResults, singleEvents=True,
             orderBy='startTime').execute()
-        events[cal] = events_result.get('items', [])
+        calendar_events = events_result.get('items', [])
+        filtered = []
+        # filter out all events that start before start time (mainly for events occuring at start but that started BEFORE)
+        for event in calendar_events:
+            ev_start, _ = read_google_event_time(event)
+            ev_start = ev_start.astimezone(timezone)
+            if ev_start >= start: filtered.append(event)
+        events[cal] = filtered
     return events
 
-def display_events(calendars, all_events, absolute_start, end, tz, raw=False):
+def display_event(event, timezone):
+    start, _ = read_google_event_time(event)
+    start = start.astimezone(timezone)
+    print("%d/%d/%d %.2d:%.2d" %(start.month, start.day, start.year, start.hour, start.minute), event['summary'])
 
+def display_events(calendars, all_events, absolute_start, end, tz, raw=False):
+    """DEPRECATED"""
     print("Printing all events between:")
     print("    %s" % absolute_start)
     print("    %s" % end)
@@ -159,9 +165,15 @@ def main():
 
     tzinfo = tz.gettz(args.timezone)
     start, end = load_start_end(args.start, args.end, tzinfo)
-    all_events = load_events(service, calendars, start, end)
+    all_events = load_events(service, calendars, start, end, tzinfo)
 
-    if args.verbose: display_events(calendars, all_events, start, end, tzinfo, args.raw)
+    if args.verbose or not args.file: 
+        # display_events(calendars, all_events, start, end, tzinfo, args.raw)
+        print("Printing all events between:")
+        print("    %s -> %s " % (start, end))
+        sorted_events = flatten_events(all_events, sort=True)
+        # import ipdb; ipdb.set_trace()
+        apply_to_events(sorted_events, display_event, tzinfo)
     if args.file:
         data = create_events_object(calendars, all_events, start, tzinfo)
         file = open(args.file, 'w')
@@ -169,3 +181,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
