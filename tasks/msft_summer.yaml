@@ -1,0 +1,20 @@
+linear_algebra:
+  - name: week_avg
+    time: 7
+    repeat: 6
+    calendar: 1. urgent
+
+stats:
+  - name: week_avg
+    time: 8
+    repeat: 7
+    calendar: 1. urgent
+
+code_prep:
+  # - name: VAE
+    # time: 15
+    # calendar: 1. urgent
+
+  - name: AVB
+    time: 15
+    calendar: 1. urgent

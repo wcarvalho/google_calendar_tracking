@@ -55,6 +55,8 @@ def load_start_end(start, end, tzinfo):
     end = parse(str(end.date())).replace(tzinfo=tzinfo)
 
   if end <= start:
+    print(start)
+    print(end)
     raise RuntimeError("end must be later than start")
   return start, end
 
