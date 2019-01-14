@@ -5,6 +5,9 @@
 import yaml
 from pprint import pprint
 import argparse
+from termcolor import colored
+# import hashlib
+
 
 # date utilities
 from dateutil.parser import parse
@@ -15,6 +18,8 @@ from datetime import datetime, timedelta
 from lib import get_calendars_info, setup_calendar, load_start_end, load_yaml, flatten_events, load_calendars_from_file
 from read import load_events
 
+
+colors = ["red", "green", "yellow", "magenta", "cyan"]
 
 def calculate_time_scheduled(events, raw_end, end, tzinfo):
   # for task in tasks:
@@ -34,25 +39,12 @@ def calculate_time_scheduled(events, raw_end, end, tzinfo):
   events = sorted(events, key = lambda x: x['start']['dateTime'])
 
   nevents = len(events)
-  
-  # def time_until_duedate(duedate, indx):
-  #   time = 0
-  #   while indx < nevents:
-  #     event = events[indx]
-  #     event_start = event['start']['dateTime']
-  #     event_end = parse(event['end']['dateTime'])
-
-  #     if event_end >= duedate: 
-  #       indx -= 1
-  #       break
-
-  #     event_length = int((event_end-event_start).total_seconds()/60)
-  #     time += event_length
-  #     indx += 1
-  #   return time, indx
 
   def split_category_activity(string):
     split = string.split(":")
+    # print(split)
+    # if len(split) > 2:
+    #   import ipdb; ipdb.set_trace()
     if len(split) == 1:
       return split[0], split[0]
     elif len(split) == 2:
@@ -84,23 +76,29 @@ def calculate_time_scheduled(events, raw_end, end, tzinfo):
 
   print("Total Time before %s: %2.2f" % (raw_end, total_time/60))
   # print("Total Time before %s/%s/%s: %2.2f" % (end.month, end.day, end.year, total_time/60))
-  try: print("Total left: %2.2f" % (tasks['block']['block']/60))
+  try: print("Total Unscheduled: %2.2f" % (tasks['block']['block']/60))
   except: pass
-  for category in sorted(tasks.keys()):
+
+  for color_indx, category in enumerate(sorted(tasks.keys())):
     if category == 'block': continue
     total_per_category = 0
     for indx, activity in enumerate(tasks[category]):
       minutes = tasks[category][activity]
       total_per_category += minutes
 
+    color_indx = (color_indx - 1)%len(colors)
+
     if len(tasks[category]) == 1:
       key = [i for i in tasks[category].keys()][0]
       print()
-      print("%s.%s: %2.2f" % (category, key, total_per_category/60))
+      if category == key:
+        print("%s: %2.2f" % (key, total_per_category/60))
+      else:
+        print("%s.%s: %2.2f" % (colored(category, colors[color_indx]), key, total_per_category/60))
       continue
 
     print()
-    print("%s: %2.2f" % (category, total_per_category/60))
+    print("%s: %2.2f" % (colored(category, colors[color_indx]), total_per_category/60))
     for indx, activity in enumerate(tasks[category]):
       minutes = tasks[category][activity]
       # print("\t%d. %s: %2.2fm/%2.2fh" % (indx+1, activity, minutes, minutes/60))

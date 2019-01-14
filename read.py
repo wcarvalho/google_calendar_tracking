@@ -34,7 +34,11 @@ from lib import *
 def load_events(service, calendars, start, end, timezone, maxResults=1000):
     events = {}
     for cal in calendars:
-        id = calendars[cal]['id']
+        try:
+            id = calendars[cal]['id']
+        except Exception as e:
+            print("Calendar '%s' doesn't exist" % cal)
+            pass
         events_result = service.events().list(
             calendarId=id,
             timeMin=start.isoformat(), 
