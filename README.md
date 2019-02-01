@@ -24,15 +24,18 @@ Together, I should be able to create, save, load, and move events with these scr
     - "appointments"
   ```
 
-  
-
 ## Example Usage
-```
+```bash
 # see time scheduled between 1/25 and 1/30
 python scheduled_time.py -s 1/25 -e 1/30
 ```
 
+**note**: If you name your calendar events `category:task`, the script will interpret show the tasks under a category as follows
+
+![categories](/Users/wilka/git/calendar_automator/figs/category_example.png)
+
 ## Workflow
+
 You want create and experiment with multiple calendar templates to see which is best. For each one:
   1. Create a template for a week (or some time-length)
   1. Clear across dates that you want to apply this template (from appropriate calendars)
