@@ -118,6 +118,7 @@ def calculate_time_availability_by_calendar(events, tasks, end, tzinfo):
   print("Your required time is %.1f hours" % (total_required/60.0))
   print("Your available buffer is %.1f hours" % (calendar_time/60.0))
   print("We recommend a buffer above %.1f hours" % (total_required*.05/60.0))
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", default=None, help="yaml file to load task data from.")
@@ -129,7 +130,10 @@ def main():
 
     tzinfo = tz.gettz(args.timezone)
 
-    task_data = load_yaml(args.file)
+    if args.file:
+      task_data = load_yaml(args.file)
+    else:
+      task_data = {}
     tasks = flatten_tasks(task_data)
 
     service = setup_calendar()

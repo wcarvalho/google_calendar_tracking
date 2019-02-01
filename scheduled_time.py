@@ -6,6 +6,7 @@ import yaml
 from pprint import pprint
 import argparse
 from termcolor import colored
+from bashplotlib.histogram import plot_hist
 # import hashlib
 
 
@@ -20,23 +21,78 @@ from read import load_events
 
 
 colors = ["red", "green", "yellow", "magenta", "cyan"]
+day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+def half_round(x):
+  # round to nearest quester
+  return round(x*2)/2
+
+def quarter_round(x):
+  # round to nearest quester
+  return round(x*4)/4
+
+def tenth_round(x):
+  # round to nearest quester
+  return round(x*10)/10
+
+def calculate_daily_available(events, raw_end, end, tzinfo):
+
+  indx = -1
+  days = set()
+  times = {}
+  for event in events:
+    summary = event['summary']
+    if summary != "block": continue
+
+    event_start = event['start']['dateTime'].replace(tzinfo=tzinfo)
+    event_end = parse(event['end']['dateTime']).replace(tzinfo=tzinfo)
+    dif = event_end - event_start
+    minutes = dif.total_seconds()/60
+    hours = minutes/60
+
+    # import ipdb; ipdb.set_trace()
+    start_day = event_start.day
+    start_month = event_start.month
+    start_day_indx = event_start.weekday()
+    day = "%s %d/%d" % (day_names[start_day_indx], start_month, start_day)
+
+    if day in days:
+      key = "%d. %s" % (indx, day)
+      times[day] += hours
+    else:
+      indx += 1
+      days.add(day)
+      key = "%d. %s" % (indx, day)
+      times[day] = hours
+
+  if not times: return
+  print("\n\n------Daily Available Time------")
+
+  max_len = 6
+
+  max_key_len = max([len(i) for i in times.keys()])
+  for key in times:
+    apx_time = half_round(times[key])
+    apx_percent = tenth_round(apx_time/max_len)
+
+    start = ("%s: %.2f" % (key.ljust(max_key_len+1), apx_time))
+    print("%s = %s" % (start, "x"*int(8*apx_time)))
+
+
+#   day = 0
+#   event = events[0]
+
+#   day_time = 0
+#   event_end = parse(event['end']['dateTime']).replace(tzinfo=tzinfo)
+#   dif = event_end - event_start
+#   minutes = dif.total_seconds()/60
+
+#   day_time += 0
+#   # for event in events[1:]
+#     # day = 
+    
 
 def calculate_time_scheduled(events, raw_end, end, tzinfo):
-  # for task in tasks:
-  #   if not 'end' in task: 
-  #     if 'start' in task:
-  #       task['end'] = parse(task['start']).replace(tzinfo=tzinfo)
-  #       task['end'] = task['end'] if task['end'] > end else end
-  #     else:
-  #       task['end'] = end
-
-  # tasks = sorted(tasks, key = lambda x: x['end'])
-
-  # turn start dateTime into a datetime object for all events
-  for event in events:
-    event['start']['dateTime'] = parse(event['start']['dateTime'])
-  # turn events into an iterable to query
-  events = sorted(events, key = lambda x: x['start']['dateTime'])
 
   nevents = len(events)
 
@@ -46,13 +102,14 @@ def calculate_time_scheduled(events, raw_end, end, tzinfo):
     # if len(split) > 2:
     #   import ipdb; ipdb.set_trace()
     if len(split) == 1:
-      return split[0], split[0]
+      return split[0].strip(), split[0].strip()
     elif len(split) == 2:
-      return split
+      return split[0].strip(), split[1].strip()
     elif len(split) == 0:
       raise RuntimeError("empty string?")
     else:
-      return split[0], " : ".join(split[1:])
+      # import ipdb; ipdb.set_trace()
+      return split[0], ":".join(split[1:]).strip()
 
   tasks = {}
   total_time = 0
@@ -92,9 +149,9 @@ def calculate_time_scheduled(events, raw_end, end, tzinfo):
       key = [i for i in tasks[category].keys()][0]
       print()
       if category == key:
-        print("%s: %2.2f" % (key, total_per_category/60))
+        print("%s: %2.2f" % (colored(key, colors[color_indx]), total_per_category/60))
       else:
-        print("%s.%s: %2.2f" % (colored(category, colors[color_indx]), key, total_per_category/60))
+        print("%s: %s: %2.2f" % (colored(category, colors[color_indx]), key, total_per_category/60))
       continue
 
     print()
@@ -103,7 +160,6 @@ def calculate_time_scheduled(events, raw_end, end, tzinfo):
       minutes = tasks[category][activity]
       # print("\t%d. %s: %2.2fm/%2.2fh" % (indx+1, activity, minutes, minutes/60))
       print("\t%d. %s: %2.2fh" % (indx+1, activity, minutes/60))
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -130,7 +186,14 @@ def main():
     for calendar in calendars:
       combined_events += all_events[calendar]
 
+    # turn start dateTime into a datetime object for all events
+    for event in combined_events:
+      event['start']['dateTime'] = parse(event['start']['dateTime'])
+    combined_events = sorted(combined_events, key = lambda x: x['start']['dateTime'])
+
     calculate_time_scheduled(combined_events, args.end, end, tzinfo)
+
+    calculate_daily_available(combined_events, args.end, end, tzinfo)
 
 
 if __name__ == '__main__':

@@ -7,12 +7,6 @@ I've wanted to template my calendars for years. I think each week is different, 
 
 Together, I should be able to create, save, load, and move events with these scripts. And I think this will facilitate maintaining and editing templates.
 
-## Workflow
-You want create and experiment with multiple calendar templates to see which is best. For each one:
-  1. Create a template for a week (or some time-length)
-  1. Clear across dates that you want to apply this template (from appropriate calendars)
-  1. Place from template across those dates
-  1. run time-availability script to see buffer
 
 
 ## Getting Started
@@ -20,8 +14,36 @@ You want create and experiment with multiple calendar templates to see which is 
   * turn on the Google Calendar API for this app and 
   * get credentials which will allow this app to interface with the Google Calendar API
 
+* Create a file called `calendars.yaml` and place in it the calendars you which to track on Google Calendar. They should a `planning` key. (This was an arbitrary design choice that I forgot the motivation for) Mine looks like:
+
+  ```yaml
+  planning:
+    - "1. urgent"
+    - "4. papers"
+    - "errands"
+    - "appointments"
+  ```
+
+  
+
+## Example Usage
+```
+# see time scheduled between 1/25 and 1/30
+python scheduled_time.py -s 1/25 -e 1/30
+```
+
+## Workflow
+You want create and experiment with multiple calendar templates to see which is best. For each one:
+  1. Create a template for a week (or some time-length)
+  1. Clear across dates that you want to apply this template (from appropriate calendars)
+  1. Place from template across those dates
+  1. run time-availability script to see buffer
 
 ## Todo
+
+
+1: hierarchical indenting. functionality  (maybe)
+2: times per day (more useful)
 
 ### Main Functions
 1. **read.py**
