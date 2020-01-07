@@ -2,18 +2,15 @@
     shift.py by Wilka Carvalho 
 """
 # python utils
-import yaml
-from pprint import pprint
 import argparse
 
 # date utilities
-from dateutil.parser import parse
 from dateutil import tz
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 # this library
-from lib import *
-from read import load_events, read_google_event_time
+from calendar_automator.lib import *
+from calendar_automator.read import load_events, read_google_event_time
 
 def shift(event, service, calendars, tzinfo, minutes, test_only, verbose):
     start, end = read_google_event_time(event)

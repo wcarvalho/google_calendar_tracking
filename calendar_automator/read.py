@@ -29,7 +29,7 @@ from dateutil import tz
 from datetime import datetime, timedelta
 
 # this library
-from lib import *
+from calendar_automator.lib import *
 
 def load_events(service, calendars, start, end, timezone, maxResults=1000):
     events = {}

@@ -2,22 +2,18 @@
     available_time.py by Wilka Carvalho
 """
 # python utils
-import yaml
-from pprint import pprint
 import argparse
 from termcolor import colored
-from bashplotlib.histogram import plot_hist
 # import hashlib
 
 
 # date utilities
 from dateutil.parser import parse
 from dateutil import tz
-from datetime import datetime, timedelta
 
 # this library
-from lib import get_calendars_info, setup_calendar, load_start_end, load_yaml, flatten_events, load_calendars_from_file
-from read import load_events
+from calendar_automator.lib import get_calendars_info, setup_calendar, load_start_end, load_calendars_from_file
+from calendar_automator.read import load_events
 
 
 colors = ["red", "green", "yellow", "magenta", "cyan"]
@@ -35,7 +31,7 @@ def tenth_round(x):
   # round to nearest quester
   return round(x*10)/10
 
-def calculate_daily_available(events, raw_end, end, tzinfo):
+def calculate_daily_available(events, raw_end, end, tzinfo, to_skip='_block'):
 
   indx = -1
   days = set()
@@ -79,18 +75,6 @@ def calculate_daily_available(events, raw_end, end, tzinfo):
     print("%s = %s" % (start, "x"*int(8*apx_time)))
 
 
-#   day = 0
-#   event = events[0]
-
-#   day_time = 0
-#   event_end = parse(event['end']['dateTime']).replace(tzinfo=tzinfo)
-#   dif = event_end - event_start
-#   minutes = dif.total_seconds()/60
-
-#   day_time += 0
-#   # for event in events[1:]
-#     # day = 
-    
 
 def calculate_time_scheduled(events, raw_end, end, tzinfo):
 
@@ -133,11 +117,11 @@ def calculate_time_scheduled(events, raw_end, end, tzinfo):
 
   print("Total Time before %s: %2.2f" % (raw_end, total_time/60))
   # print("Total Time before %s/%s/%s: %2.2f" % (end.month, end.day, end.year, total_time/60))
-  try: print("Total Unscheduled: %2.2f" % (tasks['block']['block']/60))
-  except: pass
+  # try: print("Total Unscheduled: %2.2f" % (tasks['block']['block']/60))
+  # except: pass
 
   for color_indx, category in enumerate(sorted(tasks.keys())):
-    if category == 'block': continue
+    # if category == 'block': continue
     total_per_category = 0
     for indx, activity in enumerate(tasks[category]):
       minutes = tasks[category][activity]
@@ -166,7 +150,7 @@ def main():
     parser.add_argument("-f", "--file", default=None, help="yaml file to load task data from.")
     parser.add_argument("-s", "--start", default=None, help="start time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use current time.")
     parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. If nothing set, will use end of current day.")
-    parser.add_argument("-t", "--timezone", default="US/Pacific")
+    parser.add_argument("-t", "--timezone", default="US/Eastern")
     parser.add_argument("-v", "--verbose", action='store_true')
     args = parser.parse_args()
 

@@ -16,7 +16,7 @@ from dateutil import tz
 from datetime import datetime, timedelta
 
 # this library
-from lib import get_calendars_info, setup_calendar, load_start_end, load_yaml, load_calendars_from_file
+from calendar_automator.lib import get_calendars_info, setup_calendar, load_start_end, load_yaml, load_calendars_from_file
 from clear import clear_events
 
 def put_events(data, calendars, service, start, timezone, verbose=False, test_only=False):

@@ -6,7 +6,7 @@ import yaml
 import argparse
 import pprint
 
-from lib import load_yaml
+from calendar_automator.lib import load_yaml
 
 def required_time(data, tasks):
   time_needed = 0

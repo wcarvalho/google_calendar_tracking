@@ -1,0 +1,5 @@
+EECS598:
+  - name: week_avg
+    time: 10
+    repeat: 12
+    end: 4/20

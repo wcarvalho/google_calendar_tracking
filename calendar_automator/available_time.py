@@ -2,18 +2,16 @@
     available_time.py by Wilka Carvalho
 """
 # python utils
-import yaml
-from pprint import pprint
 import argparse
 
 # date utilities
 from dateutil.parser import parse
 from dateutil import tz
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 # this library
-from lib import get_calendars_info, setup_calendar, load_start_end, load_yaml, flatten_events
-from read import load_events
+from calendar_automator.lib import get_calendars_info, setup_calendar, load_start_end, load_yaml
+from calendar_automator.read import load_events
 
 
 def get_calendars_from_tasks(tasks):

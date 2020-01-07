@@ -3,23 +3,16 @@
 
 """
 # python utils
-import yaml
-import pprint
 import argparse
 
 # Google
-from apiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
 
 # date utilities
-from dateutil.parser import parse
 from dateutil import tz
-from datetime import datetime, timedelta
 
 # this library
-from lib import *
-from read import load_events, display_events, read_google_event_time
+from calendar_automator.lib import *
+from calendar_automator.read import load_events, read_google_event_time
 
 # def delete_events(service, calendars, all_events, absolute_start, timezone, verbose=False):
 #   for cal in calendars:

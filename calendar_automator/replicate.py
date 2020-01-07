@@ -4,20 +4,15 @@
 """
 
 # python utils
-import yaml
-import pprint
 import argparse
 
 # date utilities
 # from pytz import timezone
-from dateutil.parser import parse
-from dateutil.relativedelta import relativedelta
 from dateutil import tz
-from datetime import datetime, timedelta
 
 # this library
-from lib import get_calendars_info, setup_calendar, load_start_end, load_yaml, load_calendars_from_file
-from read import load_events, create_events_object
+from calendar_automator.lib import get_calendars_info, setup_calendar, load_start_end, load_calendars_from_file
+from calendar_automator.read import load_events, create_events_object
 from clear import clear_events
 from put import tile
 

@@ -23,7 +23,7 @@ python scheduled_time.py -s 1/25 -e 1/30
 
 **note**: If you name your calendar events `category:task`, the script will interpret show the tasks under a category as follows
 
-![categories](figs/category_example.png)
+![categories](calendar_automator/figs/category_example.png)
 
 ## Workflow
 
