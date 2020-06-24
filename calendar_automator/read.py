@@ -36,23 +36,23 @@ def load_events(service, calendars, start, end, timezone, maxResults=1000):
     for cal in calendars:
         try:
             id = calendars[cal]['id']
+            events_result = service.events().list(
+                calendarId=id,
+                timeMin=start.isoformat(), 
+                timeMax=end.isoformat(),
+                maxResults=maxResults, singleEvents=True,
+                orderBy='startTime').execute()
+            calendar_events = events_result.get('items', [])
+            filtered = []
+            # filter out all events that start before start time (mainly for events occuring at start but that started BEFORE)
+            for event in calendar_events:
+                ev_start, _ = read_google_event_time(event)
+                ev_start = ev_start.astimezone(timezone)
+                if ev_start >= start: filtered.append(event)
+            events[cal] = filtered
         except Exception as e:
             print("Calendar '%s' doesn't exist" % cal)
             pass
-        events_result = service.events().list(
-            calendarId=id,
-            timeMin=start.isoformat(), 
-            timeMax=end.isoformat(),
-            maxResults=maxResults, singleEvents=True,
-            orderBy='startTime').execute()
-        calendar_events = events_result.get('items', [])
-        filtered = []
-        # filter out all events that start before start time (mainly for events occuring at start but that started BEFORE)
-        for event in calendar_events:
-            ev_start, _ = read_google_event_time(event)
-            ev_start = ev_start.astimezone(timezone)
-            if ev_start >= start: filtered.append(event)
-        events[cal] = filtered
     return events
 
 def display_event(event, timezone):

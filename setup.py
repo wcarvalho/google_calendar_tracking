@@ -14,9 +14,9 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = 'CalendarAutomator'
 DESCRIPTION = 'Package for automating calendar operations'
-URL = 'https://github.com/me/myproject'
-EMAIL = 'me@example.com'
-AUTHOR = 'Awesome Soul'
+URL = 'https://github.com/wcarvalho/google_calendar_creation_automation'
+EMAIL = 'wcarvalho92@gmail.com'
+AUTHOR = 'Wilka Carvalho'
 REQUIRES_PYTHON = '>=3.5.0'
 VERSION = '0.1.0'
 
@@ -108,7 +108,10 @@ setup(
     # py_modules=['mypackage'],
 
     entry_points={
-        'console_scripts': ['peak_calendar=calendar_automator.scheduled_time:main'],
+        'console_scripts': [
+          'peak_calendar=calendar_automator.scheduled_time:main',
+          'time_dist=calendar_automator.time_distributions:main',
+        ],
     },
     install_requires=REQUIRED,
     extras_require=EXTRAS,

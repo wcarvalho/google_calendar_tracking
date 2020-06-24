@@ -31,14 +31,16 @@ def tenth_round(x):
   # round to nearest quester
   return round(x*10)/10
 
-def calculate_daily_available(events, raw_end, end, tzinfo, to_skip='_block'):
+def calculate_daily_available(events, raw_end, end, tzinfo, to_skip='_block', available_names=['block', 'deep-work']):
 
   indx = -1
   days = set()
   times = {}
+  available_names = set(available_names)
+
   for event in events:
-    summary = event['summary']
-    if summary != "block": continue
+    summary = event['summary'].strip()
+    if not (summary in available_names): continue
 
     event_start = event['start']['dateTime'].replace(tzinfo=tzinfo)
     event_end = parse(event['end']['dateTime']).replace(tzinfo=tzinfo)
@@ -156,8 +158,6 @@ def main():
 
     tzinfo = tz.gettz(args.timezone)
 
-    # task_data = load_yaml(args.file)
-    # tasks = flatten_tasks(task_data)
 
     service = setup_calendar()
     calendar_list = load_calendars_from_file()
