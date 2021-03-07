@@ -1,3 +1,4 @@
+*.egg*
 credentials.json
 client_secret.json
 calendars.yaml

@@ -39,6 +39,69 @@ def flatten_events(events_calendar_dic, sort=False):
   if sort: return sorted(events, key = lambda x: parse(x['start']['dateTime']))
   return events
 
+
+
+
+
+# ======================================================
+# loading calendars
+# ======================================================
+def load_calendar_service(credentials="credentials.json", secret="client_secret.json"):
+  """Summary
+  
+  Args:
+      credentials (str, optional): Description
+      secret (str, optional): Description
+  
+  Returns:
+      TYPE: Description
+  """
+  SCOPES = 'https://www.googleapis.com/auth/calendar'
+  store = file.Storage(credentials)
+  creds = store.get()
+  if not creds or creds.invalid:
+      flow = client.flow_from_clientsecrets(secret, SCOPES)
+      creds = tools.run_flow(flow, store)
+  return build('calendar', 'v3', http=creds.authorize(Http()))
+
+
+def get_calendar_dicts(service, calendar_names, desired_attributes = ['id']):
+  """Summary
+  
+  Args:
+      service (TYPE): Description
+      calendar_names (TYPE): Description
+      desired_attributes (list, optional): Description
+  
+  Returns:
+      TYPE: Description
+  """
+  calendar_dicts = {c: {} for c in calendar_names}
+  
+  page_token = None
+  while True:
+    google_calendars = service.calendarList().list(pageToken=page_token).execute()
+    for calendar_list_entry in google_calendars['items']:
+      key=calendar_list_entry['summary'].lower()
+      if key in calendar_names:
+          for att in desired_attributes:
+              calendar_dicts[key][att] = calendar_list_entry[att]
+    page_token = google_calendars.get('nextPageToken')
+    if not page_token:
+      break
+  return calendar_dicts
+
+# def load_calendars_from_file(file="calendars.yaml", op='planning'):
+#   stream = open(file, 'r')
+#   dic = next(yaml.load_all(stream))
+#   return [i for i in dic[op]]
+
+
+
+# ======================================================
+# Misc.
+# ======================================================
+
 def load_start_end(start, end, tzinfo):
   # tzinfo info:
   # replace: keeps current time and uses timezone
@@ -59,34 +122,3 @@ def load_start_end(start, end, tzinfo):
     print(end)
     raise RuntimeError("end must be later than start")
   return start, end
-
-def load_calendars_from_file(f="calendars.yaml", op='planning'):
-  stream = open(f, 'r')
-  dic = next(yaml.load_all(stream))
-  return [i for i in dic[op]]
-
-def get_calendars_info(service, calendar_names, desired_attributes = ['id']):
-  calendars = {c: {} for c in calendar_names}
-  
-  page_token = None
-  while True:
-    google_calendars = service.calendarList().list(pageToken=page_token).execute()
-    for calendar_list_entry in google_calendars['items']:
-      key=calendar_list_entry['summary'].lower()
-      if key in calendar_names:
-          for att in desired_attributes:
-              calendars[key][att] = calendar_list_entry[att]
-    page_token = google_calendars.get('nextPageToken')
-    if not page_token:
-      break
-  return calendars
-
-def setup_calendar(credentials="credentials.json", secret="client_secret.json"):
-  SCOPES = 'https://www.googleapis.com/auth/calendar'
-  store = file.Storage(credentials)
-  creds = store.get()
-  if not creds or creds.invalid:
-      flow = client.flow_from_clientsecrets(secret, SCOPES)
-      creds = tools.run_flow(flow, store)
-  return build('calendar', 'v3', http=creds.authorize(Http()))
-

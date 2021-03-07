@@ -1,16 +1,34 @@
+"""Summary
+
+Attributes:
+    term (TYPE): Description
+"""
+
+# get path of file
+import sys
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+parent_dir_path = os.path.abspath(os.path.join(dir_path, os.pardir))
+
+# change path to settings
+SETTINGS_FILEPATH=f"{parent_dir_path}/settings.yaml"
+
+
+
 # python utils
 import argparse
 from termcolor import colored
 import collections
 from tabulate import tabulate
 from blessed import Terminal
+import yaml
 
 # date utilities
 from dateutil.parser import parse
 from dateutil import tz
 
 # this library
-from calendar_automator.lib import get_calendars_info, setup_calendar, load_start_end, load_calendars_from_file
+from calendar_automator.lib import get_calendar_dicts, load_calendar_service, load_start_end
 from calendar_automator.read import load_events
 
 
@@ -24,13 +42,11 @@ def split_project_task(task):
     project: task
     returns project, task
   """
-  # import ipdb; ipdb.set_trace()
   task = task.replace("\n", ". ")
   split = task.split(":", 1)
 
   if len(split) == 1:
 
-    # return split[0].strip(), split[0].strip()
     return split[0].strip(), ""
   elif len(split) == 2:
     # project, task
@@ -49,59 +65,23 @@ def compute_event_length(event, tzinfo):
   return minutes
 
 def format_task(task):
-  beginning = task.find("[")
-  end = task.find("]")+1
-  if beginning > -1:
-    sub = task[beginning: end]
-    task = task.replace(sub, "")
+  # beginning = task.find("[")
+  # end = task.find("]")+1
+  # if beginning > -1:
+  #   sub = task[beginning: end]
+  #   task = task.replace(sub, "")
   return task
 
 
-def task_labels(task):
-  beginning = task.find("[")+1
-  end = task.find("]")
-  sub = task[beginning:end]
-  
-  if beginning > 0:
-    labels = list(set(sub.split(",")))
-  else:
-    labels = []
-  # import ipdb; ipdb.set_trace()
-  if not('p1' in labels or 'p2' in labels or 'p3' in labels or 'p4' in labels):
-    labels.append('p1')
-
-  return labels
-
-
-def label2name(x):
-  labels = {
-    'p1': "    Important &     Urgent",
-    'p2': "    Important & Not Urgent",
-    'p3': "Not Important & Urgent",
-    'p4': "Not Important & Not Urgent",
-  }
-  if x in labels:
-    return labels[x]
-  else:
-    return x.capitalize()
-
-def label2percentgoal(x):
-  label_percent_goals={
-    'p1': 80,
-    'p2': 10,
-    'p3': 5,
-    'p4': 5,
-    'service': 10,
-    'literature': 10
-  }
-  if x in label_percent_goals:
-    return label_percent_goals[x]
-  else:
-    return "N/A"
-
-def multitask_project(project, time, time_percent, total_time, fulltask2length, fulltask2task, fulltask_names, line_divider):
+def multitask_project_lines(project, time, time_percent, total_time, fulltask2length, fulltask2task, fulltask_names, line_divider):
+  """
+    Get multi-line project lines. e.g., in format
+    Project                              x          x
+              1. task 1                  x          x
+              2. task 2                  x          x
+  """
   lines = []
-  line = [project.capitalize(), '', "%.1f" % time, "%2.f" % time_percent]
+  line = [project.capitalize(), '(total)', "%.1f" % time, "%2.f" % time_percent]
   lines.append(line_divider)
   lines.append(line)
 
@@ -110,11 +90,15 @@ def multitask_project(project, time, time_percent, total_time, fulltask2length, 
     if not task: continue
     time = fulltask2length[fulltask_name]
     time_percent = 100*(time/total_time)
+
+
     line = ['', f"{indx+1}. {task}",  "%.1f" % time, "%2.f" % time_percent]
+    # print(line)
+    # import ipdb; ipdb.set_trace()
     lines.append(line)
   return lines
 
-def singletask_project(project, time, time_percent, fulltask2length, fulltask2task, fulltask_names, line_divider):
+def singletask_project_line(project, time, time_percent, fulltask2length, fulltask2task, fulltask_names, line_divider):
   # -----------------------
   # get task information
   # -----------------------
@@ -128,6 +112,10 @@ def singletask_project(project, time, time_percent, fulltask2length, fulltask2ta
 
   return lines
 
+
+# ======================================================
+# main functions
+# ======================================================
 def calculate_time_per_task(events, raw_end, end, tzinfo, 
   scheduling_events=set(['deep-work', 'block', 'paper', 'unscheduled']),
   ):
@@ -173,54 +161,17 @@ def calculate_time_per_task(events, raw_end, end, tzinfo,
 
 
   # ======================================================
-  # Want to print :
-  # Priority| Time | % Total Time
-  # ======================================================
-  # -----------------------
-  # first get time used for each
-  # -----------------------
-  label2length = collections.defaultdict(float)
-  total_scheduled = 0
-  for fulltask_name, length in fulltask2length.items():
-    if fulltask_name in scheduling_events: continue
-    labels = task_labels(fulltask_name)
-    # import ipdb; ipdb.set_trace()
-    for label in labels:
-      label2length[label] += length
-
-    total_scheduled += length
-
-
-  # -----------------------
-  # now print
-  # -----------------------
-  header = ["Label", "Time: %.1f/%.1f" % (total_scheduled, total_time), "Percent Scheduled", "Percent Total", "Goal"]
-  lines = []
-  for label, time in label2length.items():
-    # if not label: continue
-
-    label_name = label2name(label)
-    name = f"{label_name}"
-    time_percent_scheduled = 100*(time/total_scheduled)
-    time_percent_total = 100*(time/total_time)
-    line = [name, "%.1f" % time, "%2.f" % time_percent_scheduled, "%2.f" % time_percent_total, label2percentgoal(label)]
-    lines.append(line)
-
-
-  print(term.olivedrab1("="*15 + " Scheduled Time Priority Distribtuon " + "="*15))
-  print(tabulate(lines, headers=header, tablefmt="pretty"))
-  
-
-
-
-
-  # ======================================================
   # Want to print in a hierarchical manner:
   # Project| Task | Time | % Total Time
   # ======================================================
   header=["Project","Task", "Time: %.1f" % total_time, "Percent"]
   lines = [header]
   title_lengths = [len(x) for x in header]
+
+
+  # -----------------------
+  # create line_divider between projects
+  # -----------------------
   max_project_length = len(max(project2fulltasks.keys(), key=lambda x: len(x)))
   formatted_tasknames = [format_task(t) for t in fulltask2task.values()]
   max_task_length = len(max(formatted_tasknames, key=lambda x: len(x)))
@@ -229,30 +180,41 @@ def calculate_time_per_task(events, raw_end, end, tzinfo,
                   "-"*(title_lengths[2]+1),
                   "-"*(title_lengths[3]+1)]
 
+
   # -----------------------
   # create lines for table
   # -----------------------
-
-  # first remove unscheduled and add it manually
+  # first remove dummy `unscheduled` and add it manually
   project = 'unscheduled'
   time = project2length[project]
   time_percent = 100*(time/total_time)
   project2fulltasks.pop(project, None)
-  lines.extend(singletask_project(project, time, time_percent, fulltask2length, fulltask2task, [project], line_divider))
+  lines.extend(singletask_project_line(project, time, time_percent, fulltask2length, fulltask2task, [project], line_divider))
 
   # then add the rest
   for project, fulltask_names in project2fulltasks.items():
     time = project2length[project]
     time_percent = 100*(time/total_time)
+
     if len(fulltask_names) > 1:
-      new_lines = multitask_project(project, time, total_time, time_percent, fulltask2length, fulltask2task, fulltask_names, line_divider)
+      new_lines = multitask_project_lines(
+        project=project,
+        time=time,
+        time_percent=time_percent,
+        total_time=total_time,
+        fulltask2length=fulltask2length,
+        fulltask2task=fulltask2task,
+        fulltask_names=fulltask_names,
+        line_divider=line_divider
+        )
+
     elif len(fulltask_names) == 1:
-      new_lines = singletask_project(project, time, time_percent, fulltask2length, fulltask2task, fulltask_names, line_divider)
+      new_lines = singletask_project_line(project, time, time_percent, fulltask2length, fulltask2task, fulltask_names, line_divider)
     else:
       raise NotImplementedError
     lines.extend(new_lines)
-  print("\n")
-  print(term.orangered("="*15 + " Task Time Distribtuon " + "="*15))
+
+
   print(tabulate(lines, tablefmt="pretty"))
 
 
@@ -260,62 +222,60 @@ def calculate_time_per_day(events,
     raw_end,
     end,
     tzinfo,
-    to_skip='_block',
-    target_events=['block', 'deep-work', 'paper'],
+    assignable=['block', 'deep-work', 'paper'],
     round_base=.25,
     day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]):
+    """
+    Print out the amount of time available for each day
+    """
 
-  indx = -1
-  days = set()
-  target_events = set(target_events)
+    indx = -1
+    days = set()
+    assignable = set(assignable)
 
-  time_per_day = collections.defaultdict(float)
+    time_per_day = collections.defaultdict(float)
 
-  for event in events:
-    eventname = event['summary'].strip()
-    if not (eventname in target_events): continue
+    for event in events:
+        eventname = event['summary'].strip()
+        if not (eventname in assignable): continue
 
 
+        # -----------------------
+        # get the day information
+        # -----------------------
+        event_start = event['start']['dateTime'].replace(tzinfo=tzinfo)
+        start_day = event_start.day
+        start_month = event_start.month
+        start_day_indx = event_start.weekday()
+        day = "%s %d/%d" % (day_names[start_day_indx], start_month, start_day)
+
+        hours = compute_event_length(event, tzinfo)
+        time_per_day[day] += hours
+
+
+    if not time_per_day: return
+
+    total_time = sum(time_per_day.values())
     # -----------------------
-    # get the day information
+    # now print
     # -----------------------
-    event_start = event['start']['dateTime'].replace(tzinfo=tzinfo)
-    start_day = event_start.day
-    start_month = event_start.month
-    start_day_indx = event_start.weekday()
-    day = "%s %d/%d" % (day_names[start_day_indx], start_month, start_day)
+    header = ["Day","Time: %.1f" % customround(total_time, round_base), "Percent", '']
+    lines = []
+    for day, time in time_per_day.items():
+        rounded_time = customround(time, round_base)
 
-    hours = compute_event_length(event, tzinfo)
-    time_per_day[day] += hours
-
-  # import ipdb; ipdb.set_trace()
-  if not time_per_day: return
-
-  total_time = sum(time_per_day.values())
-  # -----------------------
-  # now print
-  # -----------------------
-  header = ["Day","Time: %.1f" % customround(total_time, round_base), "Percent", '']
-  lines = []
-  for day, time in time_per_day.items():
-    rounded_time = customround(time, round_base)
+        time_percent = 100*(time/total_time)
+        blocks = "x"*int((1/round_base)*rounded_time)
+        line = [day, "%.1f" % rounded_time, "%2.f" % time_percent, blocks]
+        lines.append(line)
 
 
-    time_percent = 100*(time/total_time)
-    blocks = "x"*int((1/round_base)*rounded_time)
-    line = [day, "%.1f" % rounded_time, "%2.f" % time_percent, blocks]
-    lines.append(line)
-
-  print("\n")
-  print(term.darkgoldenrod1("="*15 + " Unscheduled Daily Time Distribtuon " + "="*15))
-  print(tabulate(lines, headers=header, tablefmt="pretty"))
-  
+    print(tabulate(lines, headers=header, tablefmt="pretty"))
 
 
-
-
-
-
+# ======================================================
+# program
+# ======================================================
 
 def main():
     parser = argparse.ArgumentParser()
@@ -327,33 +287,53 @@ def main():
 
     tzinfo = tz.gettz(args.timezone)
 
-
-    service = setup_calendar()
-    calendar_list = load_calendars_from_file()
-    calendars = get_calendars_info(service, calendar_list)
+    # ======================================================
+    # load settings
+    # ======================================================
+    with open(SETTINGS_FILEPATH, 'r') as f:
+        settings = yaml.load(f)
 
     # ======================================================
     # parse start and end dates into objects
     # ======================================================
     start, end = load_start_end(args.start, args.end, tzinfo)
 
+
+    # ======================================================
+    # load calendars
+    # ======================================================
+    calendar_service = load_calendar_service(
+        credentials=os.path.join(parent_dir_path, settings['credentials']),
+        secret=os.path.join(parent_dir_path, settings['secret']))
+
+    calendars = get_calendar_dicts(calendar_service, 
+        calendar_names=settings['calendars'])
+
     # ======================================================
     # get all events within that time-frame
     # ======================================================
-    all_events = load_events(service, calendars, start, end, tzinfo) # per calendar
-    combined_events = [] # combined across calendars
+    calendar2event = load_events(calendar_service, calendars, start, end, tzinfo) # per calendar
+    all_events = [] # combined across calendars
     for calendar in calendars:
-      combined_events += all_events[calendar]
+      all_events += calendar2event[calendar]
 
 
     # turn start dateTime into a datetime object for all events
-    for event in combined_events:
+    for event in all_events:
       event['start']['dateTime'] = parse(event['start']['dateTime'])
-    combined_events = sorted(combined_events, key = lambda x: x['start']['dateTime'])
+    # sort by starting time
+    all_events = sorted(all_events, key = lambda x: x['start']['dateTime'])
 
 
-    calculate_time_per_task(combined_events, args.end, end, tzinfo)
-    calculate_time_per_day(combined_events,args.end,end,tzinfo)
+    print(term.orangered("="*15 + " Task Time Distribtuon " + "="*15))
+    calculate_time_per_task(all_events, args.end, end, tzinfo)
+
+
+    print("\n")
+    print(term.darkgoldenrod1("="*15 + " Unscheduled Daily Time Distribtuon " + "="*15))
+    calculate_time_per_day(all_events, args.end, end, tzinfo,
+        assignable=settings['assignable'],
+        )
 
 
 
