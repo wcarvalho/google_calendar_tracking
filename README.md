@@ -41,6 +41,7 @@ I assume calendar events follow the format: `project:task`.
 time_dist --start 3/15 --end 3/17
 ```
 
+Here's an example below with dummy data:
 <table>
   <tr>
     <td>
