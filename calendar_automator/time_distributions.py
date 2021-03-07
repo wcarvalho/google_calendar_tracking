@@ -11,7 +11,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 parent_dir_path = os.path.abspath(os.path.join(dir_path, os.pardir))
 
 # change path to settings
-SETTINGS_FILEPATH=f"{parent_dir_path}/settings.yaml"
+SETTINGS_FILEPATH=os.path.join(parent_dir_path, "settings.yaml")
 
 
 

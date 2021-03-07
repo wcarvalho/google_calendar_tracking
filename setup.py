@@ -22,12 +22,14 @@ VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    # "pytz",
+    "pyyaml",
     "python-dateutil ",
-    # "termcolor",
+    "blessed",
     "oauth2client",
     "google-api-python-client",
     "tabulate",
+    "blessed",
+
     # 'requests', 'maya', 'records',
 ]
 
