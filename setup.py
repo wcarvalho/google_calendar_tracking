@@ -22,10 +22,9 @@ VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    "pytz",
-    "ipdb",
+    # "pytz",
     "python-dateutil ",
-    "termcolor",
+    # "termcolor",
     "oauth2client",
     "google-api-python-client",
     "tabulate",

@@ -17,7 +17,7 @@ SETTINGS_FILEPATH=f"{parent_dir_path}/settings.yaml"
 
 # python utils
 import argparse
-from termcolor import colored
+# from termcolor import colored
 import collections
 from tabulate import tabulate
 from blessed import Terminal
