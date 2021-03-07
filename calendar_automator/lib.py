@@ -46,23 +46,27 @@ def flatten_events(events_calendar_dic, sort=False):
 # ======================================================
 # loading calendars
 # ======================================================
-def load_calendar_service(credentials="credentials.json", secret="client_secret.json"):
-  """Summary
-  
-  Args:
+def load_calendar_service(credentials="credentials.json"):
+    """Summary
+
+    Args:
       credentials (str, optional): Description
       secret (str, optional): Description
-  
-  Returns:
+
+    Returns:
       TYPE: Description
-  """
-  SCOPES = 'https://www.googleapis.com/auth/calendar'
-  store = file.Storage(credentials)
-  creds = store.get()
-  if not creds or creds.invalid:
-      flow = client.flow_from_clientsecrets(secret, SCOPES)
-      creds = tools.run_flow(flow, store)
-  return build('calendar', 'v3', http=creds.authorize(Http()))
+    """
+    SCOPES = 'https://www.googleapis.com/auth/calendar'
+    store = file.Storage(credentials)
+    creds = store.get()
+    if not creds or creds.invalid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                credentials, SCOPES)
+            creds = flow.run_local_server(port=0)
+    return build('calendar', 'v3', http=creds.authorize(Http()))
 
 
 def get_calendar_dicts(service, calendar_names, desired_attributes = ['id']):

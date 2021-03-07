@@ -7,10 +7,7 @@ pip install -e .
 ```
 
 
-Step 2: setup google api: Follow [these steps](https://developers.google.com/calendar/quickstart/python) to
-* turn on the Google Calendar API for this app and 
-* get credentials (`credentials.json`, `client_secret.json`) which will allow this app to interface with the Google Calendar API 
-
+Step 2: turn on the Google Calendar API for this app and get credentials (`credentials.json`). You only need to do step 1 from [Google Python Quickstart tutorial](https://developers.google.com/calendar/quickstart/python).
 
 
 Create a file called `settings.yaml` and place it in this directory. It should contain the following:

@@ -306,7 +306,7 @@ def main():
     # ======================================================
     calendar_service = load_calendar_service(
         credentials=os.path.join(parent_dir_path, settings['credentials']),
-        secret=os.path.join(parent_dir_path, settings['secret']))
+        )
 
     calendars = get_calendar_dicts(calendar_service, 
         calendar_names=settings['calendars'])
