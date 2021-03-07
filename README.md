@@ -1,3 +1,28 @@
+## Example Usage
+
+I assume calendar events follow the format: `project:task`.
+
+```bash
+time_dist --start 3/15 --end 3/17
+```
+
+Here's an example from my calendar with dummy data:
+<table>
+  <tr>
+    <td>
+      <img class="" src="misc/terminal.png">
+    </td>
+    <td>
+      <img class="" src="misc/calendar.png">
+    </td>
+  </tr>
+  <tr>
+    <td>Example terminal call</td>
+    <td>Corresponding calendar</td>
+  </tr>
+</table>
+
+
 ## Getting Started
 
 Step 1: Install.
@@ -29,29 +54,6 @@ assignable:
 * `calendars`: The calendars within your gmail account you want to load data from
 * `assignable`: The name used for events which you will treat as ''unassigned time". See example below.
 
-## Example Usage
-
-I assume calendar events follow the format: `project:task`.
-
-```bash
-time_dist --start 3/15 --end 3/17
-```
-
-Here's an example from my calendar with dummy data:
-<table>
-  <tr>
-    <td>
-      <img class="" src="misc/terminal.png">
-    </td>
-    <td>
-      <img class="" src="misc/calendar.png">
-    </td>
-  </tr>
-  <tr>
-    <td>Example terminal call</td>
-    <td>Corresponding calendar</td>
-  </tr>
-</table>
 
 
 
