@@ -42,10 +42,14 @@ I assume calendar events follow the format: `project:task`.
 time_dist --start 3/15 --end 3/17
 ```
 
-Example terminal call
+Example terminal call:
+
 ![categories](misc/terminal.png)
 
+
+
 Corresponding calendar
+
 ![categories](misc/calendar.png)
 
 
