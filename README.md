@@ -38,7 +38,6 @@ assignable:
 I assume calendar events follow the format: `project:task`.
 
 ```bash
-# see time scheduled between 1/25 and 1/30
 time_dist --start 3/15 --end 3/17
 ```
 
