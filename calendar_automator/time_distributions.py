@@ -182,7 +182,7 @@ def calculate_time_per_task(events, raw_end, end, tzinfo,
 
 
   # -----------------------
-  # create lines for table
+  # create table
   # -----------------------
   # first remove dummy `unscheduled` and add it manually
   project = 'unscheduled'
@@ -190,6 +190,8 @@ def calculate_time_per_task(events, raw_end, end, tzinfo,
   time_percent = 100*(time/total_time)
   project2fulltasks.pop(project, None)
   lines.extend(singletask_project_line(project, time, time_percent, fulltask2length, fulltask2task, [project], line_divider))
+
+
 
   # then add the rest
   for project, fulltask_names in project2fulltasks.items():
