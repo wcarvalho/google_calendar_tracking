@@ -22,6 +22,13 @@ VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
+    "pytz",
+    "ipdb",
+    "python-dateutil ",
+    "termcolor",
+    "oauth2client",
+    "google-api-python-client",
+    "tabulate",
     # 'requests', 'maya', 'records',
 ]
 
@@ -109,7 +116,6 @@ setup(
 
     entry_points={
         'console_scripts': [
-          'peak_calendar=calendar_automator.scheduled_time:main',
           'time_dist=calendar_automator.time_distributions:main',
         ],
     },
