@@ -42,16 +42,23 @@ I assume calendar events follow the format: `project:task`.
 time_dist --start 3/15 --end 3/17
 ```
 
-Example terminal call:
+<table>
+  <tr>
+    <td>
+      <img class="" src="misc/terminal.png">
+    </td>
+    <td>
+      <img class="" src="misc/calendar.png">
+    </td>
+  </tr>
+  <tr>
+    <td>Example terminal call</td>
+    <td>Corresponding calendar</td>
+  </tr>
+</table>
 
-![categories](misc/terminal.png)
-
-
-
-Corresponding calendar
-
-![categories](misc/calendar.png)
 
 
 ## Resources
 1. [Google Calendar API](https://developers.google.com/calendar/)
+2. [My time-management guide](https://wcarvalho.github.io/tutorial/2016/01/08/TimeManagementPrescription/)
