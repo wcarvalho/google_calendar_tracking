@@ -117,7 +117,7 @@ def singletask_project_line(project, time, time_percent, fulltask2length, fullta
 # main functions
 # ======================================================
 def calculate_time_per_task(events, raw_end, end, tzinfo, 
-  scheduling_events=set(['deep-work', 'block', 'paper', 'unscheduled']),
+  assignable=set(['deep-work', 'block', 'paper', 'unscheduled']),
   ):
   nevents = len(events)
 
@@ -139,7 +139,7 @@ def calculate_time_per_task(events, raw_end, end, tzinfo,
   for event in events:
     fulltask_name = event['summary'].lower()
     project, task = split_project_task(fulltask_name)
-    if project in scheduling_events:
+    if project in assignable:
       fulltask_name = project = "unscheduled"
 
     fulltask2project[fulltask_name] = project
@@ -327,7 +327,9 @@ def main():
 
 
     print(term.orangered("="*15 + " Task Time Distribtuon " + "="*15))
-    calculate_time_per_task(all_events, args.end, end, tzinfo)
+    calculate_time_per_task(all_events, args.end, end, tzinfo,
+      assignable=settings['assignable']
+      )
 
 
     print("\n")
