@@ -117,8 +117,9 @@ def singletask_project_line(project, time, time_percent, fulltask2length, fullta
 # main functions
 # ======================================================
 def calculate_time_per_task(events, raw_end, end, tzinfo, 
-  assignable=set(['deep-work', 'block', 'paper', 'unscheduled']),
+  assignable=[],
   ):
+  assignable = set(assignable)
   nevents = len(events)
 
   # stores total time for project
