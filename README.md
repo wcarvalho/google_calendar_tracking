@@ -10,7 +10,7 @@ pip install -e .
 Step 2: turn on the Google Calendar API for this app and get credentials (`credentials.json`). You only need to do step 1 from [Google Python Quickstart tutorial](https://developers.google.com/calendar/quickstart/python).
 
 
-Create a file called `settings.yaml` and place it in this directory. It should contain the following:
+Step 3: setup settings yamlfile. Create a file called `settings.yaml` and place it in this directory. It should contain the following:
 
   ```yaml
 credentials: credentials.json # probably unchanged 
@@ -38,6 +38,7 @@ I assume calendar events follow the format: `project:task`.
 time_dist --start 3/15 --end 3/17
 ```
 
+Here's an example below with dummy data:
 <table>
   <tr>
     <td>
