@@ -13,7 +13,7 @@ Step 2: setup google api: Follow [these steps](https://developers.google.com/cal
 
 
 
-Create a file called `settings.yaml` and place it in this directory. It should contain the following:
+Step 3: setup settings yamlfile. Create a file called `settings.yaml` and place it in this directory. It should contain the following:
 
   ```yaml
 credentials: credentials.json # probably unchanged 
