@@ -14,6 +14,7 @@ from calendar_automator.lib import get_calendars_info, setup_calendar, load_star
 from calendar_automator.read import load_events
 
 
+
 term = Terminal()
 def customround(x, base=5):
     return base * round(x/base)
@@ -23,6 +24,8 @@ def split_project_task(task):
     project: task
     returns project, task
   """
+  # import ipdb; ipdb.set_trace()
+  task = task.replace("\n", ". ")
   split = task.split(":", 1)
 
   if len(split) == 1:
@@ -46,32 +49,59 @@ def compute_event_length(event, tzinfo):
   return minutes
 
 def format_task(task):
-  task = task.replace("[p0]", "")
-  task = task.replace("[p1]", "")
-  task = task.replace("[p2]", "")
-  task = task.replace("[p3]", "")
-  task = task.replace("[p4]", "")
+  beginning = task.find("[")
+  end = task.find("]")+1
+  if beginning > -1:
+    sub = task[beginning: end]
+    task = task.replace(sub, "")
   return task
 
-def task_priority(task):
-  if "[p0]" in task: return 0
-  elif "[p1]" in task: return 1
-  elif "[p2]" in task: return 2
-  elif "[p3]" in task: return 3 
-  elif "[p4]" in task: return 4
-  else:return 1
 
-def priority2name(x):
-  return {
-    1: "    Important &     Urgent",
-    2: "    Important & Not Urgent",
-    3: "Not Important & Urgent",
-    4: "Not Important & Not Urgent",
-  }[x]
+def task_labels(task):
+  beginning = task.find("[")+1
+  end = task.find("]")
+  sub = task[beginning:end]
+  
+  if beginning > 0:
+    labels = list(set(sub.split(",")))
+  else:
+    labels = []
+  # import ipdb; ipdb.set_trace()
+  if not('p1' in labels or 'p2' in labels or 'p3' in labels or 'p4' in labels):
+    labels.append('p1')
+
+  return labels
+
+
+def label2name(x):
+  labels = {
+    'p1': "    Important &     Urgent",
+    'p2': "    Important & Not Urgent",
+    'p3': "Not Important & Urgent",
+    'p4': "Not Important & Not Urgent",
+  }
+  if x in labels:
+    return labels[x]
+  else:
+    return x.capitalize()
+
+def label2percentgoal(x):
+  label_percent_goals={
+    'p1': 80,
+    'p2': 10,
+    'p3': 5,
+    'p4': 5,
+    'service': 10,
+    'literature': 10
+  }
+  if x in label_percent_goals:
+    return label_percent_goals[x]
+  else:
+    return "N/A"
 
 def multitask_project(project, time, time_percent, total_time, fulltask2length, fulltask2task, fulltask_names, line_divider):
   lines = []
-  line = [project, '', "%.2f" % time, "%2.f" % time_percent]
+  line = [project.capitalize(), '', "%.1f" % time, "%2.f" % time_percent]
   lines.append(line_divider)
   lines.append(line)
 
@@ -80,7 +110,7 @@ def multitask_project(project, time, time_percent, total_time, fulltask2length, 
     if not task: continue
     time = fulltask2length[fulltask_name]
     time_percent = 100*(time/total_time)
-    line = ['', f"{indx+1}. {task}",  "%.2f" % time, "%2.f" % time_percent]
+    line = ['', f"{indx+1}. {task}",  "%.1f" % time, "%2.f" % time_percent]
     lines.append(line)
   return lines
 
@@ -93,19 +123,13 @@ def singletask_project(project, time, time_percent, fulltask2length, fulltask2ta
   task = format_task(fulltask2task[fulltask_name])
 
   lines = [line_divider]
-  line = [project, task, "%.2f" % time, "%2.f" % time_percent]
+  line = [project.capitalize(), task, "%.1f" % time, "%2.f" % time_percent]
   lines.append(line)
 
   return lines
 
 def calculate_time_per_task(events, raw_end, end, tzinfo, 
   scheduling_events=set(['deep-work', 'block', 'paper', 'unscheduled']),
-  priority_percent_goals={
-  1: 70, # "    Important &     Urgent"
-  2: 10, # "    Important & Not Urgent"
-  3: 10, # "Not Important & Urgent"
-  4: 5,  # "Not Important & Not Urgent"
-  }
   ):
   nevents = len(events)
 
@@ -155,25 +179,31 @@ def calculate_time_per_task(events, raw_end, end, tzinfo,
   # -----------------------
   # first get time used for each
   # -----------------------
-  priority2length = collections.defaultdict(float)
-  # total_priority_time = 0
+  label2length = collections.defaultdict(float)
+  total_scheduled = 0
   for fulltask_name, length in fulltask2length.items():
     if fulltask_name in scheduling_events: continue
-    priority = task_priority(fulltask_name)
-    priority2length[priority] += length
+    labels = task_labels(fulltask_name)
+    # import ipdb; ipdb.set_trace()
+    for label in labels:
+      label2length[label] += length
+
+    total_scheduled += length
 
 
-  total_priority_time = sum([v for k,v in priority2length.items() if k])
   # -----------------------
   # now print
   # -----------------------
-  header = ["Priority","Time: %.2f" % total_priority_time, "Percent", "Goal"]
+  header = ["Label", "Time: %.1f/%.1f" % (total_scheduled, total_time), "Percent Scheduled", "Percent Total", "Goal"]
   lines = []
-  for priority, time in priority2length.items():
-    if not priority: continue
-    name = priority2name(priority)
-    time_percent = 100*(time/total_priority_time)
-    line = [name, "%.2f" % time, "%2.f" % time_percent, priority_percent_goals[priority]]
+  for label, time in label2length.items():
+    # if not label: continue
+
+    label_name = label2name(label)
+    name = f"{label_name}"
+    time_percent_scheduled = 100*(time/total_scheduled)
+    time_percent_total = 100*(time/total_time)
+    line = [name, "%.1f" % time, "%2.f" % time_percent_scheduled, "%2.f" % time_percent_total, label2percentgoal(label)]
     lines.append(line)
 
 
@@ -188,7 +218,7 @@ def calculate_time_per_task(events, raw_end, end, tzinfo,
   # Want to print in a hierarchical manner:
   # Project| Task | Time | % Total Time
   # ======================================================
-  header=["Project","Task", "Time: %.2f" % total_time, "Percent"]
+  header=["Project","Task", "Time: %.1f" % total_time, "Percent"]
   lines = [header]
   title_lengths = [len(x) for x in header]
   max_project_length = len(max(project2fulltasks.keys(), key=lambda x: len(x)))
@@ -265,7 +295,7 @@ def calculate_time_per_day(events,
   # -----------------------
   # now print
   # -----------------------
-  header = ["Day","Time: %.2f" % customround(total_time, round_base), "Percent", '']
+  header = ["Day","Time: %.1f" % customround(total_time, round_base), "Percent", '']
   lines = []
   for day, time in time_per_day.items():
     rounded_time = customround(time, round_base)
@@ -273,7 +303,7 @@ def calculate_time_per_day(events,
 
     time_percent = 100*(time/total_time)
     blocks = "x"*int((1/round_base)*rounded_time)
-    line = [day, "%.2f" % rounded_time, "%2.f" % time_percent, blocks]
+    line = [day, "%.1f" % rounded_time, "%2.f" % time_percent, blocks]
     lines.append(line)
 
   print("\n")
