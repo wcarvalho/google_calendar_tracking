@@ -31,8 +31,12 @@ Step 1: Install.
 pip install -e .
 ```
 
+Now enter the directory containing this package:
+```bash
+cd google_calendar_tracking
+```
 
-Step 2: turn on the Google Calendar API for this app and get credentials (`credentials.json`). You only need to do step 1 from [Google Python Quickstart tutorial](https://developers.google.com/calendar/quickstart/python). Place `credentials.json` in the directory of this package.
+Step 2: turn on the Google Calendar API for this app and get credentials (`credentials.json`). You only need to do step 1 from [Google Python Quickstart tutorial](https://developers.google.com/calendar/quickstart/python). Place `credentials.json` in this directory.
 
 
 Step 3: create a file called `settings.yaml` and place it in this directory. It should contain the following:
