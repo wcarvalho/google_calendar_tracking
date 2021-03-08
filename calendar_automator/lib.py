@@ -1,4 +1,10 @@
-from apiclient.discovery import build
+import os
+# from apiclient.discovery import build
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+
+import pickle
 from httplib2 import Http
 from oauth2client import file, client, tools
 
@@ -57,16 +63,29 @@ def load_calendar_service(credentials="credentials.json"):
       TYPE: Description
     """
     SCOPES = 'https://www.googleapis.com/auth/calendar'
-    store = file.Storage(credentials)
-    creds = store.get()
-    if not creds or creds.invalid:
+    creds = None
+
+    path = os.path.dirname(os.path.abspath(credentials))
+    token_file = os.path.join(path, 'token.pickle')
+
+    if os.path.exists(token_file):
+        with open(token_file, 'rb') as token:
+            creds = pickle.load(token)
+    # store = file.Storage(credentials)
+    # creds = store.get()
+    if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 credentials, SCOPES)
             creds = flow.run_local_server(port=0)
-    return build('calendar', 'v3', http=creds.authorize(Http()))
+        with open(token_file, 'wb') as token:
+            pickle.dump(creds, token)
+    # return build('calendar', 'v3', http=creds.authorize(Http()))
+    service = build('calendar', 'v3', credentials=creds)
+
+    return service
 
 
 def get_calendar_dicts(service, calendar_names, desired_attributes = ['id']):
@@ -90,9 +109,15 @@ def get_calendar_dicts(service, calendar_names, desired_attributes = ['id']):
       if key in calendar_names:
           for att in desired_attributes:
               calendar_dicts[key][att] = calendar_list_entry[att]
+      # else:
+      #   print(f"Skipped: {key}")
+
+    # import ipdb; ipdb.set_trace()
     page_token = google_calendars.get('nextPageToken')
     if not page_token:
       break
+
+
   return calendar_dicts
 
 # def load_calendars_from_file(file="calendars.yaml", op='planning'):

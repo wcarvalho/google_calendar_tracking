@@ -117,8 +117,11 @@ def singletask_project_line(project, time, time_percent, fulltask2length, fullta
 # main functions
 # ======================================================
 def calculate_time_per_task(events, raw_end, end, tzinfo, 
-  scheduling_events=set(['deep-work', 'block', 'paper', 'unscheduled']),
+  assignable=[],
+  ignore=[],
   ):
+  assignable = set(assignable)
+  ignore = set(ignore)
   nevents = len(events)
 
   # stores total time for project
@@ -139,14 +142,17 @@ def calculate_time_per_task(events, raw_end, end, tzinfo,
   for event in events:
     fulltask_name = event['summary'].lower()
     project, task = split_project_task(fulltask_name)
-    if project in scheduling_events:
+    if project in assignable:
       fulltask_name = project = "unscheduled"
 
+    if task in ignore or project in ignore:
+      continue
     fulltask2project[fulltask_name] = project
     fulltask2task[fulltask_name] = task
 
     length = compute_event_length(event, tzinfo)
     fulltask2length[fulltask_name] += length
+
 
   # ======================================================
   # get time assigned at project-level
@@ -217,7 +223,7 @@ def calculate_time_per_task(events, raw_end, end, tzinfo,
     lines.extend(new_lines)
 
 
-  print(tabulate(lines, tablefmt="pretty"))
+  print(tabulate(lines, tablefmt="orgtbl"))
 
 
 def calculate_time_per_day(events,
@@ -238,7 +244,7 @@ def calculate_time_per_day(events,
     time_per_day = collections.defaultdict(float)
 
     for event in events:
-        eventname = event['summary'].strip()
+        eventname = event['summary'].lower().strip()
         if not (eventname in assignable): continue
 
 
@@ -272,7 +278,7 @@ def calculate_time_per_day(events,
         lines.append(line)
 
 
-    print(tabulate(lines, headers=header, tablefmt="pretty"))
+    print(tabulate(lines, headers=header, tablefmt="orgtbl"))
 
 
 # ======================================================
@@ -327,7 +333,10 @@ def main():
 
 
     print(term.orangered("="*15 + " Task Time Distribtuon " + "="*15))
-    calculate_time_per_task(all_events, args.end, end, tzinfo)
+    calculate_time_per_task(all_events, args.end, end, tzinfo,
+      assignable=settings['assignable'],
+      ignore=settings['ignore']
+      )
 
 
     print("\n")
