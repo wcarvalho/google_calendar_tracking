@@ -335,7 +335,7 @@ def main():
     print(term.orangered("="*15 + " Task Time Distribtuon " + "="*15))
     calculate_time_per_task(all_events, args.end, end, tzinfo,
       assignable=settings['assignable'],
-      ignore=settings['ignore']
+      ignore=settings.get('ignore', []),
       )
 
 

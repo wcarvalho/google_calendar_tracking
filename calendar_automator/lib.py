@@ -68,12 +68,24 @@ def load_calendar_service(credentials="credentials.json"):
     path = os.path.dirname(os.path.abspath(credentials))
     token_file = os.path.join(path, 'token.pickle')
 
-    if os.path.exists(token_file):
+    try:
+        # older version of creds
+        store = file.Storage(credentials)
+        creds = store.get()
+        creds_invalid = creds.invalid
+    except KeyError as ke:
+        pass
+
+    except Exception as e:
+        raise e
+
+    if not creds and os.path.exists(token_file):
+        # newer version of creds
         with open(token_file, 'rb') as token:
             creds = pickle.load(token)
-    # store = file.Storage(credentials)
-    # creds = store.get()
-    if not creds or not creds.valid:
+            creds_invalid = not creds.valid
+
+    if not creds or creds_invalid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:

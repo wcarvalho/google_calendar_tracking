@@ -28,6 +28,10 @@ Here's an example from my calendar with dummy data:
 Step 1: Install.
 
 ```bash
+# optional
+conda create --name cal python=3.7 --yes
+
+#
 pip install -e .
 ```
 
