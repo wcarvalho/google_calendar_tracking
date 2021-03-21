@@ -52,7 +52,7 @@ def flatten_events(events_calendar_dic, sort=False):
 # ======================================================
 # loading calendars
 # ======================================================
-def load_calendar_service(credentials="credentials.json"):
+def load_calendar_service(credentials="credentials.json", login=False):
     """Summary
 
     Args:
@@ -74,7 +74,7 @@ def load_calendar_service(credentials="credentials.json"):
     # store = file.Storage(credentials)
     # creds = store.get()
     if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
+        if creds and creds.expired and creds.refresh_token and not login:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(

@@ -289,6 +289,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--start", default=None, help="start time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. default: current time.")
     parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. default: end of current day.")
+    parser.add_argument("-l", "--login", default=False, action='store_true', help="login token.")
     parser.add_argument("-t", "--timezone", default="US/Eastern", help="default: US/Eastern")
     args = parser.parse_args()
 
@@ -311,6 +312,7 @@ def main():
     # ======================================================
     calendar_service = load_calendar_service(
         credentials=os.path.join(parent_dir_path, settings['credentials']),
+        login=args.login,
         )
 
     calendars = get_calendar_dicts(calendar_service, 
