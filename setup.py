@@ -120,6 +120,7 @@ setup(
     entry_points={
         'console_scripts': [
           'time_dist=calendar_automator.time_distributions:main',
+          'copy=calendar_automator.copy:main',
         ],
     },
     install_requires=REQUIRED,

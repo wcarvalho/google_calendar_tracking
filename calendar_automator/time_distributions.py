@@ -7,6 +7,7 @@ Attributes:
 # get path of file
 import sys
 import os
+from pprint import pprint
 dir_path = os.path.dirname(os.path.realpath(__file__))
 parent_dir_path = os.path.abspath(os.path.join(dir_path, os.pardir))
 
@@ -289,6 +290,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--start", default=None, help="start time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. default: current time.")
     parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. default: end of current day.")
+    parser.add_argument("--per-day", default=True, help="whether to print daily availability")
+    parser.add_argument("--calendars", default=None, nargs="+", help="calendars to load data from")
     parser.add_argument("-t", "--timezone", default="US/Eastern", help="default: US/Eastern")
     args = parser.parse_args()
 
@@ -298,7 +301,7 @@ def main():
     # load settings
     # ======================================================
     with open(SETTINGS_FILEPATH, 'r') as f:
-        settings = yaml.load(f)
+        settings = yaml.safe_load(f)
 
     # ======================================================
     # parse start and end dates into objects
@@ -313,8 +316,9 @@ def main():
         credentials=os.path.join(parent_dir_path, settings['credentials']),
         )
 
+    calendar_names = args.calendars or settings['calendars']
     calendars = get_calendar_dicts(calendar_service, 
-        calendar_names=settings['calendars'])
+        calendar_names=calendar_names)
 
     # ======================================================
     # get all events within that time-frame
@@ -330,20 +334,23 @@ def main():
       event['start']['dateTime'] = parse(event['start']['dateTime'])
     # sort by starting time
     all_events = sorted(all_events, key = lambda x: x['start']['dateTime'])
+    if not len(all_events):
+        return
 
 
-    print(term.orangered("="*15 + " Task Time Distribtuon " + "="*15))
+    print(term.orangered("="*15 + " Time per task " + "="*15))
+    print('Calendars:', calendar_names)
     calculate_time_per_task(all_events, args.end, end, tzinfo,
       assignable=settings['assignable'],
       ignore=settings.get('ignore', []),
       )
 
-
-    print("\n")
-    print(term.darkgoldenrod1("="*15 + " Unscheduled Daily Time Distribtuon " + "="*15))
-    calculate_time_per_day(all_events, args.end, end, tzinfo,
-        assignable=settings['assignable'],
-        )
+    if args.per_day == True:
+        print("\n")
+        print(term.darkgoldenrod1("="*15 + " Availble time per day " + "="*15))
+        calculate_time_per_day(all_events, args.end, end, tzinfo,
+            assignable=settings['assignable'],
+            )
 
 
 

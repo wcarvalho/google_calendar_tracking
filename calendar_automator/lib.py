@@ -74,16 +74,15 @@ def load_calendar_service(credentials="credentials.json"):
         creds = store.get()
         creds_invalid = creds.invalid
     except KeyError as ke:
-        pass
+        # newer version of creds
+        if os.path.exists(token_file):
+            with open(token_file, 'rb') as token:
+                creds = pickle.load(token)
+                creds_invalid = not creds.valid
 
     except Exception as e:
         raise e
 
-    if not creds and os.path.exists(token_file):
-        # newer version of creds
-        with open(token_file, 'rb') as token:
-            creds = pickle.load(token)
-            creds_invalid = not creds.valid
 
     if not creds or creds_invalid:
         if creds and creds.expired and creds.refresh_token:
@@ -112,7 +111,6 @@ def get_calendar_dicts(service, calendar_names, desired_attributes = ['id']):
       TYPE: Description
   """
   calendar_dicts = {c: {} for c in calendar_names}
-  
   page_token = None
   while True:
     google_calendars = service.calendarList().list(pageToken=page_token).execute()
