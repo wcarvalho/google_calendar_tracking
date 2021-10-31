@@ -40,7 +40,7 @@ def main():
     parser.add_argument("-s", "--start", default=None, help="start time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. default: current time.")
     parser.add_argument("-e", "--end", default=None, help="end time. format: month/day/year hour:minute, e.g. 5/20/2018 5:34. default: end of current day.")
     parser.add_argument("--clear", default=1, type=int, help="whether to clear everything from target")
-    parser.add_argument("--verbose", default=0, type=int, help="verbosity")
+    parser.add_argument("--verbose", default=1, type=int, help="verbosity")
     parser.add_argument("--source", default=None, nargs="+", help="calendars to load data from")
     parser.add_argument("--target", default=None, nargs="+", help="calendars to load data from")
     parser.add_argument("-t", "--timezone", default="US/Eastern", help="default: US/Eastern")
@@ -97,7 +97,8 @@ def main():
     for event in source_events:
         body = {k:event[k] for k in keys}
         calendar_service.events().insert(calendarId=target_id, body=body).execute()
-
+        # if args.verbose:
+        #   print("Added %d/%d/%d %.2d:%.2d %s" %(start.month, start.day, start.year, start.hour, start.minute, event['summary']))
 
 if __name__ == '__main__':
   main()
