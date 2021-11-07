@@ -293,6 +293,8 @@ def main():
     parser.add_argument("--per-day", default=True, help="whether to print daily availability")
     parser.add_argument("--calendars", default=None, nargs="+", help="calendars to load data from")
     parser.add_argument("-t", "--timezone", default="US/Eastern", help="default: US/Eastern")
+    parser.add_argument("--settings", default=None, help="settings file")
+    parser.add_argument("--credentials", default='credentials.json', help="settings file")
     args = parser.parse_args()
 
     tzinfo = tz.gettz(args.timezone)
@@ -300,7 +302,8 @@ def main():
     # ======================================================
     # load settings
     # ======================================================
-    with open(SETTINGS_FILEPATH, 'r') as f:
+    settings_path = args.settings or SETTINGS_FILEPATH
+    with open(settings_path, 'r') as f:
         settings = yaml.safe_load(f)
 
     # ======================================================
@@ -312,8 +315,13 @@ def main():
     # ======================================================
     # load calendars
     # ======================================================
+    default_creds = None
+    if 'credentials' in settings:
+      default_creds = os.path.join(parent_dir_path, settings['credentials'])
+    credentials = args.credentials or default_creds
+
     calendar_service = load_calendar_service(
-        credentials=os.path.join(parent_dir_path, settings['credentials']),
+        credentials=credentials
         )
 
     calendar_names = args.calendars or settings['calendars']

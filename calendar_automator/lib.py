@@ -52,6 +52,7 @@ def flatten_events(events_calendar_dic, sort=False):
 # ======================================================
 # loading calendars
 # ======================================================
+
 def load_calendar_service(credentials="credentials.json"):
     """Summary
 
@@ -122,7 +123,7 @@ def get_calendar_dicts(service, calendar_names, desired_attributes = ['id']):
       # else:
       #   print(f"Skipped: {key}")
 
-    # import ipdb; ipdb.set_trace()
+    # import pdb; pdb.set_trace()
     page_token = google_calendars.get('nextPageToken')
     if not page_token:
       break
